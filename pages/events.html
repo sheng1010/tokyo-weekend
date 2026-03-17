@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Events - Tokyo Weekend</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+  <!-- Header -->
+  <div id="header"></div>
+
+  <section class="max-w-6xl mx-auto py-16">
+        <div id="card-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+  </section>
+
+<script src="../Js/main.js"></script>
+<script>
+  (async function () {
+    await loadHeader();
+    await renderCards("events");
+  })();
+</script>
+
+</body>
+</html>

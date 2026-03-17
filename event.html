@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+    <!-- Header -->
+  <div id="header"></div>
+
+<section class="max-w-5xl mx-auto py-12 px-4">
+  <img
+    id="event-image"
+    class="w-full rounded-2xl mb-10 shadow-sm"
+    alt="event image"
+  >
+
+  <p id="event-category" class="text-red-500 font-semibold text-sm md:text-base mb-3"></p>
+
+  <h1
+    id="event-title"
+    class="text-3xl md:text-5xl font-bold leading-tight max-w-4xl mb-8 text-gray-900"
+  ></h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+    <div class="bg-white rounded-2xl p-5 shadow-sm">
+      <p class="text-sm text-gray-500">Location</p>
+      <p id="event-location" class="mt-2 text-lg font-medium text-gray-900"></p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 shadow-sm">
+      <p class="text-sm text-gray-500">Date</p>
+      <p id="event-date" class="mt-2 text-lg font-medium text-gray-900"></p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+    <h2 class="text-xl font-semibold mb-4 text-gray-900">About this event</h2>
+    <p id="event-description" class="text-gray-700 leading-8 mb-6"></p>
+
+    <a
+      id="event-source-link"
+      href="#"
+      target="_blank"
+      class="inline-block text-red-500 font-medium hover:underline"
+      style="display:none;"
+    >
+      Visit source →
+    </a>
+  </div>
+</section>
+
+    <script src="../Js/main.js"></script>
+    <script>
+    (async function () {
+        await loadHeader();
+        renderEventDetail();
+    })();
+    </script>
+</body>
+
+</html>
