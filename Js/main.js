@@ -16,6 +16,17 @@ function getBasePath() {
   return path.includes("/pages/") ? "../" : "./";
 }
 
+function generateSlug(text) {
+  return (text || "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, " and ")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 function createCard(item) {
   const basePath = getBasePath();
 
@@ -43,7 +54,7 @@ function createCard(item) {
         </p>
 
         <a
-          href="${basePath}event.html?id=${item.id}"
+          href="${basePath}event.html?slug=${generateSlug(item.title)}"
           class="mt-5 inline-block text-sm text-red-500 transition-all duration-200 group-hover:translate-x-1 group-hover:text-red-400"
         >
           View details →
@@ -94,23 +105,42 @@ async function renderEventDetail() {
   if (!titleEl) return;
 
   const params = new URLSearchParams(window.location.search);
+  const slug = params.get("slug");
   const id = Number(params.get("id"));
 
   try {
     const events = await loadEvents();
-    const event = events.find(e => e.id === id);
+
+    const event = slug
+      ? events.find(e => generateSlug(e.title) === slug)
+      : events.find(e => e.id === id);
 
     if (!event) {
       titleEl.innerText = "Event not found";
       return;
     }
 
+    document.title = `${event.title} | Tokyo Weekend`;
+
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "description";
+      document.head.appendChild(meta);
+    }
+    meta.content = event.description || `${event.title} in Tokyo.`;
+
     document.getElementById("event-title").innerText = event.title || "";
     document.getElementById("event-category").innerText = event.category || "";
     document.getElementById("event-location").innerText = event.location || "";
     document.getElementById("event-date").innerText = event.date || "";
-    document.getElementById("event-image").src = event.image || "";
-    document.getElementById("event-image").alt = event.title || "";
+
+    const imageEl = document.getElementById("event-image");
+    if (imageEl) {
+      imageEl.src = event.image || "";
+      imageEl.alt = event.title || "";
+    }
+    
     document.getElementById("event-description").innerText = event.description || "";
 
     const sourceEl = document.getElementById("event-source");
