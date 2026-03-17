@@ -167,12 +167,7 @@ async function renderEventDetail() {
 }
 
 async function loadHeader() {
-  const path = window.location.pathname.toLowerCase();
-  const headerPath = path.includes("/pages/")
-    ? "/components/header-pages.html"
-    : "/components/header-root.html";
-
-  const res = await fetch(headerPath);
+  const res = await fetch("/components/header.html");
   if (!res.ok) {
     throw new Error("Failed to load header component");
   }

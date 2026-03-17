@@ -1,0 +1,109 @@
+<header class="bg-white shadow-sm sticky top-0 z-20">
+  <div class="max-w-6xl w-full mx-auto flex justify-between items-center p-4">
+    <div class="flex items-center gap-3">
+      <button
+        id="open-menu"
+        class="text-2xl text-gray-800 hover:text-red-500 transition-colors"
+        aria-label="Open menu"
+      >
+        ☰
+      </button>
+
+      <a
+        href="/index.html"
+        class="text-xl font-bold text-gray-900 hover:text-red-500 transition-colors"
+      >
+        Tokyo Weekend
+      </a>
+    </div>
+
+    <nav class="hidden md:flex space-x-10 text-sm font-medium">
+      <a href="/index.html" class="hover:text-red-500 transition-colors">Home</a>
+      <a href="/pages/film.html" class="hover:text-red-500 transition-colors">Film</a>
+      <a href="/pages/exhibitions.html" class="hover:text-red-500 transition-colors">Exhibitions</a>
+      <a href="/pages/nightlife.html" class="hover:text-red-500 transition-colors">Nightlife</a>
+      <a href="/pages/events.html" class="hover:text-red-500 transition-colors">Events</a>
+    </nav>
+  </div>
+</header>
+
+<div
+  id="menu-overlay"
+  class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-40"
+></div>
+
+<aside
+  id="side-menu"
+  class="fixed top-0 left-0 h-full w-80 max-w-[85%] bg-zinc-900 text-white shadow-2xl transform -translate-x-full transition-transform duration-300 z-50 flex flex-col"
+>
+  <div class="flex items-center justify-between p-6 border-b border-zinc-700">
+    <h2 class="text-xl font-bold tracking-wide">Tokyo Weekend</h2>
+
+    <button
+      id="close-menu"
+      class="text-3xl leading-none text-zinc-400 hover:text-red-400 transition-colors"
+      aria-label="Close menu"
+    >
+      ×
+    </button>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+    <a
+      href="/index.html"
+      class="block text-lg font-semibold transition-all duration-200 ease-out border-l-2 border-transparent hover:border-red-400 hover:pl-2 hover:text-red-400"
+    >
+      Home
+    </a>
+
+    <a
+      href="/pages/film.html"
+      class="block text-lg font-semibold transition-all duration-200 ease-out border-l-2 border-transparent hover:border-red-400 hover:pl-2 hover:text-red-400"
+    >
+      Film
+    </a>
+
+    <a
+      href="/pages/exhibitions.html"
+      class="block text-lg font-semibold transition-all duration-200 ease-out border-l-2 border-transparent hover:border-red-400 hover:pl-2 hover:text-red-400"
+    >
+      Exhibitions
+    </a>
+
+    <a
+      href="/pages/nightlife.html"
+      class="block text-lg font-semibold transition-all duration-200 ease-out border-l-2 border-transparent hover:border-red-400 hover:pl-2 hover:text-red-400"
+    >
+      Nightlife
+    </a>
+
+    <a
+      href="/pages/events.html"
+      class="block text-lg font-semibold transition-all duration-200 ease-out border-l-2 border-transparent hover:border-red-400 hover:pl-2 hover:text-red-400"
+    >
+      Events
+    </a>
+
+    <div class="border-t border-zinc-700 my-6"></div>
+
+    <p class="text-xs uppercase tracking-widest text-zinc-400">Follow</p>
+
+    <a
+      href="https://www.tiktok.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="block text-base text-zinc-300 hover:text-white transition"
+    >
+      TikTok
+    </a>
+  </nav>
+
+  <div class="px-6 py-6 border-t border-zinc-700 space-y-2 text-sm text-zinc-400">
+    <a href="#" class="block hover:text-white transition">About</a>
+    <a href="#" class="block hover:text-white transition">Contact</a>
+
+    <p class="pt-3 text-xs text-zinc-500">
+      Tokyo Weekend Guide © 2026
+    </p>
+  </div>
+</aside>
