@@ -133,6 +133,43 @@ async function renderEventDetail() {
     }
     meta.content = event.description || `${event.title} in Tokyo.`;
 
+    // canonical
+    let canonical = document.querySelector("link[rel='canonical']");
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      document.head.appendChild(canonical);
+    }
+    canonical.href = `${window.location.origin}/event/${generateSlug(event.title)}`;
+
+    // structured data
+    let structuredData = document.getElementById("event-structured-data");
+    if (!structuredData) {
+      structuredData = document.createElement("script");
+      structuredData.type = "application/ld+json";
+      structuredData.id = "event-structured-data";
+      document.head.appendChild(structuredData);
+    }
+
+    structuredData.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "name": event.title || "",
+      "description": event.description || "",
+      "image": event.image ? [event.image] : [],
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "location": {
+        "@type": "Place",
+        "name": event.location || "Tokyo"
+      },
+      "organizer": {
+        "@type": "Organization",
+        "name": event.source || "Tokyo Weekend"
+      },
+      "url": `${window.location.origin}/event/${generateSlug(event.title)}`
+    });
+
     document.getElementById("event-title").innerText = event.title || "";
     document.getElementById("event-category").innerText = event.category || "";
     document.getElementById("event-location").innerText = event.location || "";
