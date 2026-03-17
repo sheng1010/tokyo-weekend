@@ -7,13 +7,11 @@ async function loadEvents() {
 }
 
 function getEventsJsonPath() {
-  const path = window.location.pathname.toLowerCase();
-  return path.includes("/pages/") ? "../data/events.json" : "./data/events.json";
+  return "/data/events.json";
 }
 
 function getBasePath() {
-  const path = window.location.pathname.toLowerCase();
-  return path.includes("/pages/") ? "../" : "./";
+  return "/";
 }
 
 function generateSlug(text) {
@@ -171,8 +169,8 @@ async function renderEventDetail() {
 async function loadHeader() {
   const path = window.location.pathname.toLowerCase();
   const headerPath = path.includes("/pages/")
-    ? "../components/header-pages.html"
-    : "./components/header-root.html";
+    ? "/components/header-pages.html"
+    : "/components/header-root.html";
 
   const res = await fetch(headerPath);
   if (!res.ok) {
