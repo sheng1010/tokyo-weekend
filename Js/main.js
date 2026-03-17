@@ -54,7 +54,7 @@ function createCard(item) {
         </p>
 
         <a
-          href="${basePath}event.html?slug=${generateSlug(item.title)}"
+          href="${basePath}event/${generateSlug(item.title)}"
           class="mt-5 inline-block text-sm text-red-500 transition-all duration-200 group-hover:translate-x-1 group-hover:text-red-400"
         >
           View details →
@@ -105,7 +105,12 @@ async function renderEventDetail() {
   if (!titleEl) return;
 
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get("slug");
+  const querySlug = params.get("slug");
+
+  const path = window.location.pathname.toLowerCase();
+  const pathSlug = path.startsWith("/event/") ? path.slice("/event/".length) : null;
+
+  const slug = querySlug || pathSlug;
   const id = Number(params.get("id"));
 
   try {
@@ -140,7 +145,7 @@ async function renderEventDetail() {
       imageEl.src = event.image || "";
       imageEl.alt = event.title || "";
     }
-    
+
     document.getElementById("event-description").innerText = event.description || "";
 
     const sourceEl = document.getElementById("event-source");
