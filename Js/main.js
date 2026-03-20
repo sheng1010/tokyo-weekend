@@ -28,6 +28,14 @@ function generateSlug(text) {
 function createCard(item) {
   const basePath = getBasePath();
 
+  const isLocalhost =
+  window.location.hostname === "127.0.0.1" ||
+  window.location.hostname === "localhost";
+
+const detailUrl = isLocalhost
+  ? `${basePath}event.html?slug=${generateSlug(item.title)}`
+  : `${basePath}event/${generateSlug(item.title)}`;
+
   return `
     <div class="group bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-xl hover:border-gray-300">
       <div class="overflow-hidden">
@@ -52,7 +60,7 @@ function createCard(item) {
         </p>
 
         <a
-          href="${basePath}event/${generateSlug(item.title)}"
+          href="${detailUrl}"
           class="mt-5 inline-block text-sm text-red-500 transition-all duration-200 group-hover:translate-x-1 group-hover:text-red-400"
         >
           View details →
@@ -105,8 +113,12 @@ async function renderEventDetail() {
   const params = new URLSearchParams(window.location.search);
   const querySlug = params.get("slug");
 
-  const path = window.location.pathname.toLowerCase();
-  const pathSlug = path.startsWith("/event/") ? path.slice("/event/".length) : null;
+  const parts = window.location.pathname.split("/").filter(Boolean);
+  let pathSlug = null;
+
+  if (parts.length >= 2 && parts[0].toLowerCase() === "event") {
+    pathSlug = parts[1].toLowerCase();
+  }
 
   const slug = querySlug || pathSlug;
   const id = Number(params.get("id"));
