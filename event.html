@@ -21,8 +21,13 @@
 
   <h1
     id="event-title"
-    class="text-3xl md:text-5xl font-bold leading-tight max-w-4xl mb-8 text-gray-900"
+    class="text-4xl md:text-6xl font-bold leading-[1.05] max-w-4xl mb-4 text-gray-900"
   ></h1>
+
+  <p
+    id="event-summary"
+    class="max-w-3xl text-base md:text-xl leading-[1.65] text-gray-600 mb-8"
+  ></p>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
     <div class="bg-white rounded-2xl p-5 shadow-sm">
@@ -34,11 +39,24 @@
       <p class="text-sm text-gray-500">Date</p>
       <p id="event-date" class="mt-2 text-lg font-medium text-gray-900"></p>
     </div>
+
+    <div class="bg-white rounded-2xl p-5 shadow-sm">
+      <p class="text-sm text-gray-500">Nearest station</p>
+      <p id="event-access" class="mt-2 text-lg font-medium text-gray-900"></p>
+    </div>
   </div>
+
+  <section class="bg-white rounded-3xl p-8 shadow-sm mb-10">
+    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+      Highlights
+    </h2>
+
+    <ul id="event-highlights" class="space-y-4"></ul>
+  </section>
 
   <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
     <h2 class="text-xl font-semibold mb-4 text-gray-900">About this event</h2>
-    <p id="event-description" class="text-gray-700 leading-8 mb-6"></p>
+    <div id="event-description" class="mt-4 text-gray-700"></div>
 
     <a
       id="event-source-link"

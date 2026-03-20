@@ -25,38 +25,48 @@ function generateSlug(text) {
     .replace(/^-|-$/g, "");
 }
 
+function safeArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function getEventSlug(item) {
+  return item?.slug || generateSlug(item?.title || "");
+}
+
 function createCard(item) {
   const basePath = getBasePath();
+  const itemSlug = getEventSlug(item);
 
   const isLocalhost =
-  window.location.hostname === "127.0.0.1" ||
-  window.location.hostname === "localhost";
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "localhost";
 
-const detailUrl = isLocalhost
-  ? `${basePath}event.html?slug=${generateSlug(item.title)}`
-  : `${basePath}event/${generateSlug(item.title)}`;
+  const detailUrl = isLocalhost
+    ? `${basePath}event.html?slug=${itemSlug}`
+    : `${basePath}event/${itemSlug}`;
 
   return `
     <div class="group bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-xl hover:border-gray-300">
       <div class="overflow-hidden">
         <img
-          src="${item.image}"
-          alt="${item.title}"
+          src="${item.image || getFallbackImage(item)}"
+          alt="${item.title || ""}"
           class="w-full h-48 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          onerror="this.onerror=null;this.src='${getFallbackImage(item)}';"
         >
       </div>
 
       <div class="p-5">
         <span class="text-xs text-red-500 font-semibold uppercase tracking-wide">
-          ${item.category}
+          ${item.category || ""}
         </span>
 
         <h3 class="font-semibold text-lg leading-snug mt-3 text-gray-900">
-          ${item.title}
+          ${item.title || ""}
         </h3>
 
         <p class="text-gray-500 text-sm mt-3 leading-6">
-          ${item.location} • ${item.date}
+          ${(item.location || "").trim()}${item.date ? ` • ${item.date}` : ""}
         </p>
 
         <a
@@ -71,11 +81,29 @@ const detailUrl = isLocalhost
 }
 
 function filterByCategory(events, pageName) {
-  if (pageName === "film") return events.filter(e => e.category === "Film");
-  if (pageName === "exhibitions") return events.filter(e => e.category === "Exhibition");
-  if (pageName === "nightlife") return events.filter(e => e.category === "Nightlife");
-  if (pageName === "events") return events.filter(e => e.category === "Event");
+  if (pageName === "film") return events.filter((e) => e.category === "Film");
+  if (pageName === "exhibitions") return events.filter((e) => e.category === "Exhibition");
+  if (pageName === "nightlife") return events.filter((e) => e.category === "Nightlife");
+  if (pageName === "events") return events.filter((e) => e.category === "Event");
   return events;
+}
+
+function getFallbackImage(item) {
+  const text = `${item.location || ""} ${item.source || ""}`.toLowerCase();
+
+  if (text.includes("museum of contemporary art tokyo") || text.includes("mot")) {
+    return "/images/fallback/mot-logo.png";
+  }
+
+  if (text.includes("mori art museum") || text.includes("mori")) {
+    return "/images/fallback/mori-logo.png";
+  }
+
+  if (text.includes("national art center") || text.includes("nact")) {
+    return "/images/fallback/nact-logo.png";
+  }
+
+  return "/images/fallback/default-museum.png";
 }
 
 async function renderCards(pageName) {
@@ -127,15 +155,24 @@ async function renderEventDetail() {
     const events = await loadEvents();
 
     const event = slug
-      ? events.find(e => generateSlug(e.title) === slug)
-      : events.find(e => e.id === id);
+      ? events.find((e) => getEventSlug(e) === slug)
+      : events.find((e) => e.id === id);
 
     if (!event) {
       titleEl.innerText = "Event not found";
       return;
     }
 
-    document.title = `${event.title} | Tokyo Weekend`;
+    const eventSlug = getEventSlug(event);
+    const descriptionList = safeArray(event.description);
+    const highlightsList = safeArray(event.highlights);
+
+    const descriptionText =
+      descriptionList.length > 0
+        ? descriptionList.join(" ")
+        : (event.description || "");
+
+    document.title = `${event.title || "Event"} | Tokyo Weekend`;
 
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
@@ -143,18 +180,16 @@ async function renderEventDetail() {
       meta.name = "description";
       document.head.appendChild(meta);
     }
-    meta.content = event.description || `${event.title} in Tokyo.`;
+    meta.content = descriptionText || `${event.title || "Event"} in Tokyo.`;
 
-    // canonical
     let canonical = document.querySelector("link[rel='canonical']");
     if (!canonical) {
       canonical = document.createElement("link");
       canonical.rel = "canonical";
       document.head.appendChild(canonical);
     }
-    canonical.href = `${window.location.origin}/event/${generateSlug(event.title)}`;
+    canonical.href = `${window.location.origin}/event/${eventSlug}`;
 
-    // structured data
     let structuredData = document.getElementById("event-structured-data");
     if (!structuredData) {
       structuredData = document.createElement("script");
@@ -166,34 +201,91 @@ async function renderEventDetail() {
     structuredData.text = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Event",
-      "name": event.title || "",
-      "description": event.description || "",
-      "image": event.image ? [event.image] : [],
-      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-      "eventStatus": "https://schema.org/EventScheduled",
-      "location": {
+      name: event.title || "",
+      description: descriptionText || "",
+      image: event.image ? [event.image] : [],
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      eventStatus: "https://schema.org/EventScheduled",
+      location: {
         "@type": "Place",
-        "name": event.location || "Tokyo"
+        name: event.location || "Tokyo"
       },
-      "organizer": {
+      organizer: {
         "@type": "Organization",
-        "name": event.source || "Tokyo Weekend"
+        name: event.source || "Tokyo Weekend"
       },
-      "url": `${window.location.origin}/event/${generateSlug(event.title)}`
+      url: `${window.location.origin}/event/${eventSlug}`
     });
 
-    document.getElementById("event-title").innerText = event.title || "";
-    document.getElementById("event-category").innerText = event.category || "";
-    document.getElementById("event-location").innerText = event.location || "";
-    document.getElementById("event-date").innerText = event.date || "";
+    const categoryEl = document.getElementById("event-category");
+    if (categoryEl) {
+      categoryEl.innerText = event.category || "";
+    }
+
+    titleEl.innerText = event.title || "";
+
+    const locationEl = document.getElementById("event-location");
+    if (locationEl) {
+      locationEl.innerText = event.location || "";
+    }
+
+    const dateEl = document.getElementById("event-date");
+    if (dateEl) {
+      dateEl.innerText = event.date || "";
+    }
+
+    const accessEl = document.getElementById("event-access");
+    if (accessEl) {
+      accessEl.innerText = event.access || "-";
+    }
 
     const imageEl = document.getElementById("event-image");
     if (imageEl) {
-      imageEl.src = event.image || "";
+      imageEl.src = event.image || getFallbackImage(event);
       imageEl.alt = event.title || "";
+
+      imageEl.onerror = function () {
+        this.onerror = null;
+        this.src = getFallbackImage(event);
+      };
     }
 
-    document.getElementById("event-description").innerText = event.description || "";
+    const summaryEl = document.getElementById("event-summary");
+    if (summaryEl) {
+      summaryEl.innerText = event.summary || "";
+      summaryEl.style.display = event.summary ? "block" : "none";
+    }
+
+    const descriptionEl = document.getElementById("event-description");
+    if (descriptionEl) {
+      if (descriptionList.length > 0) {
+        descriptionEl.innerHTML = descriptionList
+          .map((p) => `<p class="mb-4">${p}</p>`)
+          .join("");
+      } else {
+        descriptionEl.innerText = event.description || "";
+      }
+    }
+
+    const highlightsEl = document.getElementById("event-highlights");
+    if (highlightsEl) {
+      if (highlightsList.length > 0) {
+        highlightsEl.innerHTML = highlightsList
+          .map(
+            (item) => `
+            <li class="flex items-start gap-3">
+              <span class="mt-[8px] w-2.5 h-2.5 bg-red-500 rounded-full shrink-0"></span>
+              <span class="text-[15px] md:text-lg leading-[1.75] text-gray-800">
+                ${item}
+              </span>
+            </li>
+          `
+          )
+          .join("");
+      } else if (highlightsEl.parentElement) {
+        highlightsEl.parentElement.style.display = "none";
+      }
+    }
 
     const sourceEl = document.getElementById("event-source");
     if (sourceEl) {
@@ -270,4 +362,10 @@ function initMenu() {
       closeMenu();
     }
   });
+}
+
+// Page entry
+const isDetailPage = window.location.pathname.includes("event.html");
+if (isDetailPage) {
+  renderEventDetail();
 }
