@@ -7,7 +7,7 @@ async function loadEvents() {
 }
 
 function getEventsJsonPath() {
-  return "../data/generated_events.json";
+  return "/data/generated_events.json";
 }
 
 function getBasePath() {
