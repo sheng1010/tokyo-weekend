@@ -50,37 +50,41 @@ function createCard(item) {
     : `${basePath}event/${itemSlug}`;
 
   return `
-    <div class="group bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-xl hover:border-gray-300">
-      <div class="overflow-hidden">
-        <img
-          src="${item.image || getFallbackImage(item)}"
-          alt="${item.title || ""}"
-          class="w-full h-48 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-          onerror="this.onerror=null;this.src='${getFallbackImage(item)}';"
-        >
-      </div>
+    <a
+      href="${detailUrl}"
+      class="group block h-full"
+    >
+      <article class="h-full bg-white rounded-[24px] border border-gray-200/80 shadow-sm overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-xl hover:border-gray-300">
+        
+        <div class="relative aspect-[4/2.5] overflow-hidden bg-gray-100">
+          <img
+            src="${item.image || getFallbackImage(item)}"
+            alt="${item.title || ""}"
+            class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+            onerror="this.onerror=null;this.src='${getFallbackImage(item)}';"
+          >
+          <div class="absolute inset-0 bg-gradient-to-t from-black/8 via-transparent to-transparent pointer-events-none"></div>
+        </div>
 
-      <div class="p-5">
-        <span class="text-xs text-red-500 font-semibold uppercase tracking-wide">
-          ${item.category || ""}
-        </span>
+        <div class="p-5 md:p-6 flex flex-col min-h-[168px]">
+          <span class="text-[11px] text-red-500 font-semibold uppercase tracking-[0.14em]">
+            ${item.category || ""}
+          </span>
 
-        <h3 class="font-semibold text-lg leading-snug mt-3 text-gray-900">
-          ${item.title || ""}
-        </h3>
+          <h3 class="mt-3 text-[18px] leading-[1.35] font-semibold text-gray-900 line-clamp-2">
+            ${item.title || ""}
+          </h3>
 
-        <p class="text-gray-500 text-sm mt-3 leading-6">
-          ${(item.location || "").trim()}${item.date ? ` • ${item.date}` : ""}
-        </p>
+          <p class="mt-3 text-gray-500 text-[13px] leading-[1.55] line-clamp-2">
+            ${(item.location || "").trim()}${item.date ? ` • ${item.date}` : ""}
+          </p>
 
-        <a
-          href="${detailUrl}"
-          class="mt-5 inline-block text-sm text-red-500 transition-all duration-200 group-hover:translate-x-1 group-hover:text-red-400"
-        >
-          View details →
-        </a>
-      </div>
-    </div>
+          <span class="mt-auto pt-5 inline-flex items-center text-[14px] text-red-500 transition-all duration-200 group-hover:translate-x-1 group-hover:text-red-400">
+            View details →
+          </span>
+        </div>
+      </article>
+    </a>
   `;
 }
 
