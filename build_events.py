@@ -91,7 +91,7 @@ STEP 2 — WRITE:
 
 1. summary
 - one sentence
-- max 20 words
+- max 18 words
 - MUST include ONE specific distinguishing feature
 - avoid generic phrases completely
 
@@ -99,26 +99,33 @@ STEP 2 — WRITE:
 - exactly 2 short paragraphs
 - paragraph 1: what is visually or structurally distinctive (be concrete)
 - paragraph 2: what kind of viewing experience or impression it creates
+- avoid filler transitions and generic tone
 
 3. highlights
 - 3 to 5 bullet points
 - use 5 only if all are specific and high-value
 - do NOT add filler just to reach a higher count
-- max 12 words each
-- MUST be specific
+- each highlight should be 12 to 18 words
+- MUST be specific and concrete
+- each highlight should include:
+  - a clear artistic element, method, structure, or subject
+  - AND what it does or how it functions
 - prefer:
   - artistic method
   - scale / material / technique
   - curatorial structure
   - exhibition format
 - avoid generic medium-only phrases
+- write each highlight as a clean editorial sentence
+
+Prefer concise editorial sentences over short fragments.
 
 STRICT RULES:
 - Do NOT invent facts
 - Do NOT mention date, venue, location in highlights
 - Do NOT convert general statements into specific visual details unless explicitly stated
-- If the source mentions scale, describe scale generally; do not specify oversized or miniature figures unless stated
-- Do NOT introduce archival footage, editing style, or visual technique unless explicitly stated
+- If the source mentions scale, describe scale generally; do not exaggerate
+- Do NOT introduce techniques or elements not explicitly mentioned
 - DO NOT use generic phrases like:
   "explore", "experience", "discover",
   "humanity", "identity", "captivating",
@@ -127,6 +134,9 @@ STRICT RULES:
   "strong emotional undertones"
 - DO NOT output medium-only highlights like:
   "sculptural works on view", "painting-focused exhibition"
+- Avoid generic expansion patterns such as:
+  "creating a sense of", "offering insight into", "inviting viewers to"
+- avoid empty expansion; longer highlights must remain grounded in the source text
 
 OUTPUT JSON ONLY:
 {{
@@ -158,19 +168,27 @@ TASK:
 
 1. summary
 - one sentence
-- max 18 words
+- max 16 words
 - include at least one concrete element if possible
 
 2. description
 - 1 to 2 short paragraphs
 - stay close to source but avoid copying phrasing
+- avoid generic editorial tone
 
 3. highlights
 - 3 to 5 bullet points
 - prefer 3 if the source text is limited
 - use more only when each point adds distinct value
+- each highlight should be 12 to 18 words
 - avoid generic phrases
 - avoid medium-only phrases
+- write each highlight as a complete sentence
+- each highlight should include:
+  - one concrete detail from the source
+  - and one clear function, structure, or effect
+
+Prefer concise editorial sentences over short fragments.
 
 OUTPUT JSON ONLY:
 {{
