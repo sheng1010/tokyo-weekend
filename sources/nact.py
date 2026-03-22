@@ -1,10 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import re
 
 from utils.common_utils import normalize_text
 from utils.score_utils import calculate_exhibition_score
-from utils.common_utils import normalize_text
 
 
 def parse_nact_special_exhibitions(soup, append_item, normalize_space):
@@ -25,14 +25,14 @@ def parse_nact_special_exhibitions(soup, append_item, normalize_space):
             for c in block.select(".ex_cate li")
         ]
         categories = [c for c in categories if c]
-        description = " / ".join(categories)
+        meta_description = " / ".join(categories)
 
         append_item(
             title=title_tag.get_text(" ", strip=True) if title_tag else "",
             date_text=date_tag.get_text(" ", strip=True) if date_tag else "",
             href=anchor.get("href", "") if anchor else "",
             img_src=img_tag.get("src", "") if img_tag else "",
-            description=description,
+            meta_description=meta_description,
         )
 
 
@@ -85,7 +85,7 @@ def parse_nact_public_exhibitions(soup, append_item, normalize_space):
             date_text=date_tag.get_text(" ", strip=True) if date_tag else "",
             href=href,
             img_src=img_tag.get("src", "") if img_tag else "",
-            description=" | ".join(detail_parts),
+            meta_description=" | ".join(detail_parts),
         )
 
 
@@ -95,16 +95,15 @@ def parse_nact_public_exhibitions(soup, append_item, normalize_space):
 def fetch_nact_exhibitions(start_id=6001):
     """Scrape current and upcoming exhibitions from The National Art Center, Tokyo."""
     base_url = "https://www.nact.jp/english/exhibition_and_event/"
-    fallback_image = "https://picsum.photos/seed/nact-exhibition/400/200"
+    fallback_image = ""
 
     print(f"[NACT] Fetching {base_url}")
 
+    session = requests.Session()
+    session.headers.update({"User-Agent": "Mozilla/5.0"})
+
     try:
-        resp = requests.get(
-            base_url,
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=30,
-        )
+        resp = session.get(base_url, timeout=30)
         resp.raise_for_status()
     except Exception as exc:
         print(f"[NACT] Error fetching page: {exc}")
@@ -114,6 +113,7 @@ def fetch_nact_exhibitions(start_id=6001):
     results = []
     next_id = start_id
     seen_keys = set()
+    detail_page_cache = {}
 
     def normalize_space(text):
         return " ".join((text or "").split())
@@ -126,6 +126,14 @@ def fetch_nact_exhibitions(start_id=6001):
         if not href:
             return base_url
         return urljoin(base_url, href)
+
+    def make_slug(text: str):
+        text = (text or "").lower().strip()
+        text = text.replace("&", " and ")
+        text = re.sub(r"[^\w\s-]", "", text)
+        text = re.sub(r"\s+", "-", text)
+        text = re.sub(r"-+", "-", text)
+        return text.strip("-")
 
     def clean_title(title: str) -> str:
         return normalize_space(title)
@@ -150,12 +158,98 @@ def fetch_nact_exhibitions(start_id=6001):
 
         return False
 
-    def append_item(title, date_text, href, img_src, description):
+    def fetch_detail_page(detail_url):
+        if not detail_url:
+            return None
+
+        if detail_url in detail_page_cache:
+            return detail_page_cache[detail_url]
+
+        try:
+            resp = session.get(detail_url, timeout=20)
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.text, "html.parser")
+            detail_page_cache[detail_url] = soup
+            return soup
+        except Exception as exc:
+            print(f"[NACT] Detail page fetch failed: {detail_url} | {exc}")
+            detail_page_cache[detail_url] = None
+            return None
+
+    def fetch_detail_description(detail_url: str, fallback_meta: str = ""):
+        """
+        进入详情页抓正文段落，返回 rawDescription 列表。
+        如果抓不到正文，就退回到列表页已有的 meta_description。
+        """
+        soup = fetch_detail_page(detail_url)
+        texts = []
+        seen_texts = set()
+
+        if soup is not None:
+            selectors = [
+                ".content_box p",
+                ".entry-content p",
+                ".post-content p",
+                ".contents p",
+                ".main_box p",
+                "main p",
+                "article p",
+            ]
+
+            for selector in selectors:
+                paragraphs = soup.select(selector)
+                if not paragraphs:
+                    continue
+
+                for p in paragraphs:
+                    text = normalize_space(p.get_text(" ", strip=True))
+                    lower = text.lower()
+
+                    if not text:
+                        continue
+                    if len(text) < 40:
+                        continue
+
+                    if any(bad in lower for bad in [
+                        "admission",
+                        "closed",
+                        "opening hours",
+                        "access",
+                        "contact",
+                        "facebook",
+                        "instagram",
+                        "twitter",
+                        "x.com",
+                        "copyright",
+                        "venue",
+                    ]):
+                        continue
+
+                    if text in seen_texts:
+                        continue
+
+                    seen_texts.add(text)
+                    texts.append(text)
+
+                if len(texts) >= 2:
+                    break
+
+        if not texts and fallback_meta:
+            texts = [fallback_meta]
+
+        if texts:
+            print(f"[NACT] Detail description found: {len(texts)} paragraphs")
+        else:
+            print(f"[NACT] No detail description found: {detail_url}")
+
+        return texts[:6]
+
+    def append_item(title, date_text, href, img_src, meta_description):
         nonlocal next_id
 
         title = clean_title(title)
         date_text = clean_date(date_text)
-        description = clean_description(description)
+        meta_description = clean_description(meta_description)
 
         if should_skip(title):
             print(f"[NACT] Skipping non-exhibition title: {title}")
@@ -163,6 +257,7 @@ def fetch_nact_exhibitions(start_id=6001):
 
         source_url = build_source_url(href)
         image_url = make_absolute(img_src) if img_src else fallback_image
+        raw_description = fetch_detail_description(source_url, fallback_meta=meta_description)
 
         key = (
             normalize_text(title),
@@ -177,15 +272,24 @@ def fetch_nact_exhibitions(start_id=6001):
 
         record = {
             "id": next_id,
+            "slug": make_slug(title),
             "title": title,
             "category": "Exhibition",
             "location": "The National Art Center, Tokyo (Roppongi)",
             "venue": "The National Art Center, Tokyo",
             "date": date_text or "See source",
+            "startDate": "",
+            "endDate": "",
             "image": image_url,
-            "description": description or f"{title} at The National Art Center, Tokyo",
+            "access": "Nogizaka Station (Chiyoda Line), direct connection / Roppongi Station within walking distance",
+            "price": "",
+            "bookingUrl": "",
             "source": "The National Art Center, Tokyo",
             "sourceUrl": source_url,
+            "tags": [],
+            "area": "Roppongi",
+            "language": "en",
+            "rawDescription": raw_description,
             "sources": ["The National Art Center, Tokyo"],
             "popularity": 0,
             "bookmarkCount": 0,

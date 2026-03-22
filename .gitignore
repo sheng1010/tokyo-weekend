@@ -21,8 +21,9 @@ __pycache__/
 # Debug / temp
 debug_next_data.json
 
-# ❗ 数据层（重要）
-data/raw_events.json
+# Locks
+*.lock
 
-# 可选：如果你以后不想让历史数据进 git
-# data/events.json
+# Data (generated / runtime)
+data/raw_events.json
+data/generated_events.json

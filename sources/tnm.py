@@ -1,11 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import re
 
 from utils.common_utils import normalize_text
 from utils.score_utils import calculate_exhibition_score
-from utils.common_utils import normalize_text
-import re
+
 
 # =========================
 # Tokyo National Museum
@@ -14,15 +14,15 @@ import re
 def fetch_tnm_exhibitions(start_id=10001):
     """Scrape current exhibitions from Tokyo National Museum."""
     base_url = "https://www.tnm.jp/?lang=en"
-    fallback_image = "https://picsum.photos/seed/tnm-exhibition/400/200"
+    fallback_image = ""
 
     print(f"[TNM] Fetching {base_url}")
+
+    session = requests.Session()
+    session.headers.update({"User-Agent": "Mozilla/5.0"})
+
     try:
-        response = requests.get(
-            base_url,
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=30,
-        )
+        response = session.get(base_url, timeout=30)
         response.raise_for_status()
     except Exception as exc:
         print(f"[TNM] Error fetching page: {exc}")
@@ -39,7 +39,15 @@ def fetch_tnm_exhibitions(start_id=10001):
     def clean_title(raw):
         if not raw:
             return ""
-        return normalize_space(BeautifulSoup(raw, "html.parser").get_text(" "))
+        return normalize_space(BeautifulSoup(str(raw), "html.parser").get_text(" "))
+
+    def make_slug(text: str):
+        text = (text or "").lower().strip()
+        text = text.replace("&", " and ")
+        text = re.sub(r"[^\w\s-]", "", text)
+        text = re.sub(r"\s+", "-", text)
+        text = re.sub(r"-+", "-", text)
+        return text.strip("-")
 
     date_pattern = re.compile(
         r"(January|February|March|April|May|June|July|August|September|October|November|December)"
@@ -102,6 +110,93 @@ def fetch_tnm_exhibitions(start_id=10001):
                 return True
         return False
 
+    detail_page_cache = {}
+
+    def fetch_detail_page(detail_url):
+        if not detail_url:
+            return None
+
+        if detail_url in detail_page_cache:
+            return detail_page_cache[detail_url]
+
+        try:
+            resp = session.get(detail_url, timeout=20)
+            resp.raise_for_status()
+            detail_soup = BeautifulSoup(resp.text, "html.parser")
+            detail_page_cache[detail_url] = detail_soup
+            return detail_soup
+        except Exception as exc:
+            print(f"[TNM] Detail page fetch failed: {detail_url} | {exc}")
+            detail_page_cache[detail_url] = None
+            return None
+
+    def fetch_detail_description(detail_url: str):
+        """
+        进入详情页抓正文段落，返回 rawDescription 列表。
+        """
+        detail_soup = fetch_detail_page(detail_url)
+        if detail_soup is None:
+            return []
+
+        selectors = [
+            ".section p",
+            ".article p",
+            ".content p",
+            ".contents p",
+            ".post p",
+            "main p",
+            "article p",
+        ]
+
+        texts = []
+        seen_texts = set()
+
+        for selector in selectors:
+            paragraphs = detail_soup.select(selector)
+            if not paragraphs:
+                continue
+
+            for p in paragraphs:
+                text = normalize_space(p.get_text(" ", strip=True))
+                lower = text.lower()
+
+                if not text:
+                    continue
+                if len(text) < 40:
+                    continue
+
+                if any(bad in lower for bad in [
+                    "ticket",
+                    "admission",
+                    "access",
+                    "hours",
+                    "closed",
+                    "inquiry",
+                    "contact",
+                    "facebook",
+                    "instagram",
+                    "twitter",
+                    "x.com",
+                    "copyright",
+                ]):
+                    continue
+
+                if text in seen_texts:
+                    continue
+
+                seen_texts.add(text)
+                texts.append(text)
+
+            if len(texts) >= 2:
+                break
+
+        if texts:
+            print(f"[TNM] Detail description found: {len(texts)} paragraphs")
+        else:
+            print(f"[TNM] No detail description found: {detail_url}")
+
+        return texts[:6]
+
     results = []
     seen_titles = set()
     seen_urls = set()
@@ -126,18 +221,33 @@ def fetch_tnm_exhibitions(start_id=10001):
             return
 
         final_date = normalize_space(date_text) or title_date or "See source"
+        raw_description = fetch_detail_description(url)
+
+        if not raw_description:
+            raw_description = [
+                f"{title_clean}. {final_date}"
+            ]
 
         record = {
             "id": start_id,
+            "slug": make_slug(title_clean),
             "title": title_clean,
             "category": "Exhibition",
             "location": "Tokyo National Museum (Ueno)",
             "venue": "Tokyo National Museum",
             "date": final_date,
+            "startDate": "",
+            "endDate": "",
             "image": image or fallback_image,
-            "description": f"{title_clean} at Tokyo National Museum",
+            "access": "Ueno Station",
+            "price": "",
+            "bookingUrl": "",
             "source": "Tokyo National Museum",
             "sourceUrl": url,
+            "tags": [],
+            "area": "Ueno",
+            "language": "en",
+            "rawDescription": raw_description,
             "sources": ["Tokyo National Museum"],
             "popularity": 0,
             "bookmarkCount": 0,

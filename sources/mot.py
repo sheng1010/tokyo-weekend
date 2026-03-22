@@ -1,41 +1,36 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+from datetime import datetime, timezone, timedelta
+import re
 
 from utils.common_utils import normalize_text
 from utils.score_utils import calculate_exhibition_score
-from utils.common_utils import normalize_text
+
 
 # =========================
 # 展览来源 Museum of Contemporary Art Tokyo
 # =========================
 def fetch_mot_exhibitions(start_id=9001):
     """Scrape current and upcoming exhibitions from Museum of Contemporary Art Tokyo."""
-    from datetime import datetime, timezone, timedelta
-
     base_url = "https://www.mot-art-museum.jp/en/exhibitions/"
     json_url = "https://www.mot-art-museum.jp/en/json/exhibitions/exhibitions.json"
     fallback_image = ""
 
     print(f"[MOT] Fetching {base_url}")
 
+    session = requests.Session()
+    session.headers.update({"User-Agent": "Mozilla/5.0"})
+
     try:
-        html_resp = requests.get(
-            base_url,
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=30,
-        )
+        html_resp = session.get(base_url, timeout=30)
         html_resp.raise_for_status()
     except Exception as exc:
         print(f"[MOT] Error fetching page: {exc}")
         return []
 
     try:
-        data_resp = requests.get(
-            json_url,
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=30,
-        )
+        data_resp = session.get(json_url, timeout=30)
         data_resp.raise_for_status()
         items = data_resp.json()
     except Exception as exc:
@@ -68,6 +63,14 @@ def fetch_mot_exhibitions(start_id=9001):
         text = BeautifulSoup(str(raw), "html.parser").get_text(" ")
         return " ".join(text.split())
 
+    def make_slug(text: str):
+        text = (text or "").lower().strip()
+        text = text.replace("&", " and ")
+        text = re.sub(r"[^\w\s-]", "", text)
+        text = re.sub(r"\s+", "-", text)
+        text = re.sub(r"-+", "-", text)
+        return text.strip("-")
+
     def to_date(value):
         if value is None:
             return None
@@ -85,7 +88,7 @@ def fetch_mot_exhibitions(start_id=9001):
         return None
 
     def format_date(dt):
-        return dt.strftime("%B %d, %Y").replace(" 0", " ")
+        return dt.strftime("%Y.%m.%d [%a]")
 
     def build_date_text(item, start_date, end_date):
         label = item.get("anotherDate")
@@ -95,7 +98,7 @@ def fetch_mot_exhibitions(start_id=9001):
         if start_date and end_date:
             if start_date == end_date:
                 return format_date(start_date)
-            return f"{format_date(start_date)} – {format_date(end_date)}"
+            return f"{format_date(start_date)} - {format_date(end_date)}"
 
         if start_date:
             return format_date(start_date)
@@ -120,6 +123,24 @@ def fetch_mot_exhibitions(start_id=9001):
 
         return not any(k in low for k in invalid_keywords)
 
+    def fetch_detail_page(detail_url):
+        if not detail_url:
+            return None
+
+        if detail_url in detail_page_cache:
+            return detail_page_cache[detail_url]
+
+        try:
+            resp = session.get(detail_url, timeout=20)
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.text, "html.parser")
+            detail_page_cache[detail_url] = soup
+            return soup
+        except Exception as exc:
+            print(f"[MOT] Detail page fetch failed: {detail_url} | {exc}")
+            detail_page_cache[detail_url] = None
+            return None
+
     def fetch_detail_page_image(detail_url):
         """
         进入详情页抓真正的展览图片：
@@ -127,28 +148,12 @@ def fetch_mot_exhibitions(start_id=9001):
         2. 最后再尝试 og:image / twitter:image
         3. 自动排除站点通用 logo / og-image
         """
-        if not detail_url:
-            return ""
-
-        if detail_url in detail_page_cache:
-            return detail_page_cache[detail_url]
-
-        try:
-            resp = requests.get(
-                detail_url,
-                headers={"User-Agent": "Mozilla/5.0"},
-                timeout=20,
-            )
-            resp.raise_for_status()
-            soup = BeautifulSoup(resp.text, "html.parser")
-        except Exception as exc:
-            print(f"[MOT] Detail page fetch failed: {detail_url} | {exc}")
-            detail_page_cache[detail_url] = ""
+        soup = fetch_detail_page(detail_url)
+        if soup is None:
             return ""
 
         candidates = []
 
-        # 1) 优先抓正文/主内容里的图
         content_selectors = [
             "main img",
             ".l-main img",
@@ -170,7 +175,6 @@ def fetch_mot_exhibitions(start_id=9001):
                 if src:
                     candidates.append(src)
 
-        # 2) 再尝试社交分享图
         og = soup.select_one('meta[property="og:image"]')
         if og and og.get("content"):
             candidates.append(og.get("content").strip())
@@ -187,11 +191,75 @@ def fetch_mot_exhibitions(start_id=9001):
             seen.add(abs_url)
 
             if is_valid_image(abs_url):
-                detail_page_cache[detail_url] = abs_url
                 return abs_url
 
-        detail_page_cache[detail_url] = ""
         return ""
+
+    def fetch_detail_description(detail_url):
+        """
+        进入详情页抓正文段落，返回 rawDescription 列表。
+        """
+        soup = fetch_detail_page(detail_url)
+        if soup is None:
+            return []
+
+        selectors = [
+            ".l-main p",
+            ".contents p",
+            ".entry-content p",
+            ".post-content p",
+            "main p",
+            "article p",
+        ]
+
+        texts = []
+        seen_texts = set()
+
+        for selector in selectors:
+            paragraphs = soup.select(selector)
+            if not paragraphs:
+                continue
+
+            for p in paragraphs:
+                text = " ".join(p.get_text(" ", strip=True).split())
+                lower = text.lower()
+
+                if not text:
+                    continue
+                if len(text) < 40:
+                    continue
+
+                if any(bad in lower for bad in [
+                    "admission",
+                    "closed",
+                    "opening hours",
+                    "ticket",
+                    "access",
+                    "contact",
+                    "facebook",
+                    "instagram",
+                    "x.com",
+                    "twitter",
+                    "copyright",
+                    "museum collection",
+                ]):
+                    continue
+
+                if text in seen_texts:
+                    continue
+
+                seen_texts.add(text)
+                texts.append(text)
+
+            if len(texts) >= 2:
+                break
+
+        if texts:
+            print(f"[MOT] Detail description found: {len(texts)} paragraphs")
+        else:
+            print(f"[MOT] No detail description found: {detail_url}")
+
+        return texts[:6]
 
     def resolve_mot_image(item, detail_url, title):
         """
@@ -222,11 +290,6 @@ def fetch_mot_exhibitions(start_id=9001):
         return fallback_image
 
     def should_skip_mot_title(title):
-        """
-        当前先不过滤，全部保留。
-        以后如果你想排除 art book fair / annual / collaboration，
-        再在这里加规则。
-        """
         return False
 
     def add_entry(item, label):
@@ -253,18 +316,28 @@ def fetch_mot_exhibitions(start_id=9001):
 
         detail_url = make_absolute(permalink)
         image_url = resolve_mot_image(item, detail_url, title)
+        raw_description = fetch_detail_description(detail_url)
 
         entry = {
             "id": start_id,
+            "slug": make_slug(title),
             "title": title,
             "category": "Exhibition",
             "location": "Museum of Contemporary Art Tokyo (Kiba)",
             "venue": "Museum of Contemporary Art Tokyo",
             "date": build_date_text(item, label["start"], label["end"]) or "See source",
+            "startDate": label["start"].isoformat() if label["start"] else "",
+            "endDate": label["end"].isoformat() if label["end"] else "",
             "image": image_url,
-            "description": f"{title} at Museum of Contemporary Art Tokyo",
+            "access": "Kiba Station (Tokyo Metro Tozai Line), around 15 minutes on foot",
+            "price": "",
+            "bookingUrl": "",
             "source": "Museum of Contemporary Art Tokyo",
             "sourceUrl": detail_url,
+            "tags": [],
+            "area": "Kiba",
+            "language": "en",
+            "rawDescription": raw_description,
             "sources": ["Museum of Contemporary Art Tokyo"],
             "popularity": 0,
             "bookmarkCount": 0,

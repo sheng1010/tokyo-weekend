@@ -1,10 +1,28 @@
 import json
 import re
 import math
+import os
+import sys
+import time
 from openai import OpenAI
 
 RAW_INPUT_PATH = "data/raw_events.json"
 OUTPUT_PATH = "data/generated_events.json"
+BUILD_SELF_LOCK_FILE = "build_events_self.lock"
+
+
+def ensure_single_build_instance():
+    if os.path.exists(BUILD_SELF_LOCK_FILE):
+        print("=== build_events.py aborted (self lock exists) ===")
+        sys.exit(0)
+
+    with open(BUILD_SELF_LOCK_FILE, "w", encoding="utf-8") as f:
+        f.write(f"pid={os.getpid()} started_at={time.time()}\n")
+
+
+def cleanup_build_lock():
+    if os.path.exists(BUILD_SELF_LOCK_FILE):
+        os.remove(BUILD_SELF_LOCK_FILE)
 
 
 def get_client() -> OpenAI:
@@ -172,6 +190,46 @@ def generate_slug(text: str) -> str:
     return text.strip("-")
 
 
+def normalize_list(value) -> list[str]:
+    if isinstance(value, list):
+        return [sanitize_text(x) for x in value if sanitize_text(x)]
+    if isinstance(value, str) and sanitize_text(value):
+        return [sanitize_text(value)]
+    return []
+
+
+def normalize_description(value) -> list[str]:
+    return normalize_list(value)
+
+
+def normalize_category(value: str) -> str:
+    text = sanitize_text(value).lower()
+
+    mapping = {
+        "exhibition": "Exhibition",
+        "exhibitions": "Exhibition",
+        "film": "Film",
+        "films": "Film",
+        "movie": "Film",
+        "movies": "Film",
+        "cinema": "Film",
+        "nightlife": "Nightlife",
+        "club": "Nightlife",
+        "clubs": "Nightlife",
+        "party": "Nightlife",
+        "parties": "Nightlife",
+        "dj event": "Nightlife",
+        "dj events": "Nightlife",
+        "live": "Nightlife",
+        "event": "Activity",
+        "events": "Activity",
+        "activity": "Activity",
+        "activities": "Activity",
+    }
+
+    return mapping.get(text, "Activity")
+
+
 def normalize_raw_description(raw) -> str:
     if isinstance(raw, list):
         parts = [sanitize_text(x) for x in raw]
@@ -186,6 +244,61 @@ def normalize_raw_description(raw) -> str:
 
 def raw_description_text(item) -> str:
     return normalize_raw_description(item.get("rawDescription"))
+
+
+def normalize_final_event(item: dict) -> dict:
+    return {
+        "id": item.get("id"),
+        "slug": sanitize_text(item.get("slug")),
+        "title": sanitize_text(item.get("title")),
+        "category": normalize_category(item.get("category")),
+        "location": sanitize_text(item.get("location")),
+        "venue": sanitize_text(item.get("venue")),
+        "date": sanitize_text(item.get("date")),
+        "image": sanitize_text(item.get("image")),
+        "summary": sanitize_text(item.get("summary")),
+        "description": normalize_description(item.get("description")),
+        "highlights": normalize_list(item.get("highlights")),
+        "access": sanitize_text(item.get("access")),
+        "source": sanitize_text(item.get("source")),
+        "sourceUrl": sanitize_text(item.get("sourceUrl")),
+        "price": sanitize_text(item.get("price")),
+        "bookingUrl": sanitize_text(item.get("bookingUrl")),
+        "startDate": sanitize_text(item.get("startDate")),
+        "endDate": sanitize_text(item.get("endDate")),
+        "tags": normalize_list(item.get("tags")),
+        "area": sanitize_text(item.get("area")),
+        "language": sanitize_text(item.get("language")) or "en",
+        "needsReview": bool(item.get("needsReview", False)),
+        "publishable": bool(item.get("publishable", True)),
+        "qualityScore": int(item.get("qualityScore", 0) or 0),
+        "qualityReasons": normalize_list(item.get("qualityReasons")),
+    }
+
+
+def validate_final_event_schema(item: dict):
+    required_fields = [
+        "id", "slug", "title", "category", "location", "venue", "date",
+        "image", "summary", "description", "highlights",
+        "access", "source", "sourceUrl",
+        "needsReview", "publishable", "qualityScore", "qualityReasons"
+    ]
+
+    for field in required_fields:
+        if field not in item:
+            raise ValueError(f"Missing final schema field: {field}")
+
+    if item["category"] not in {"Exhibition", "Film", "Nightlife", "Activity"}:
+        raise ValueError(f"Invalid category: {item['category']}")
+
+    if not isinstance(item["description"], list):
+        raise ValueError("description must be a list")
+
+    if not isinstance(item["highlights"], list):
+        raise ValueError("highlights must be a list")
+
+    if not isinstance(item["qualityReasons"], list):
+        raise ValueError("qualityReasons must be a list")
 
 
 def load_raw_events():
@@ -244,7 +357,6 @@ def build_prompt(item):
     )
 
 
-# 仅用于技术错误 fallback
 def fallback_summary(item) -> str:
     title = item.get("title", "This exhibition")
     raw = raw_description_text(item).lower()
@@ -261,7 +373,6 @@ def fallback_summary(item) -> str:
     return f"{title} is defined by a clear contemporary artistic approach."
 
 
-# 仅用于技术错误 fallback
 def fallback_description(item) -> list[str]:
     raw = raw_description_text(item).lower()
     title = item.get("title", "This exhibition")
@@ -302,7 +413,6 @@ def fallback_description(item) -> list[str]:
     ]
 
 
-# 仅用于技术错误 fallback
 def fallback_highlights(item) -> list[str]:
     raw = raw_description_text(item).lower()
     highlights = []
@@ -423,27 +533,6 @@ def contains_invented_detail(text: str) -> bool:
     return any(term in lower for term in risky_terms)
 
 
-def is_low_quality(ai):
-    text = " ".join([
-        ai.get("summary", ""),
-        " ".join(ai.get("description", [])),
-        " ".join(ai.get("highlights", [])),
-    ]).lower()
-
-    bad_patterns = [
-        "focused look",
-        "on view",
-        "painting-focused exhibition",
-        "sculptural works on view",
-        "strong emotional undertones",
-        "humanity",
-        "identity",
-        "human experience",
-    ]
-
-    return any(p in text for p in bad_patterns)
-
-
 def is_risky_output(ai):
     full_text = " ".join([
         ai.get("summary", ""),
@@ -492,21 +581,6 @@ def has_unsupported_detail(ai, item):
     return len(suspicious_terms) > 0
 
 
-def is_structurally_weak(ai):
-    summary = sanitize_text(ai.get("summary", ""))
-    description = ai.get("description", [])
-    highlights = ai.get("highlights", [])
-
-    if not summary:
-        return True
-    if not isinstance(description, list) or len([x for x in description if sanitize_text(x)]) < 2:
-        return True
-    if not isinstance(highlights, list) or len([x for x in highlights if sanitize_text(x)]) < 3:
-        return True
-
-    return False
-
-
 def parse_ai_json(content: str):
     content = content.strip()
     if content.startswith("```"):
@@ -515,21 +589,29 @@ def parse_ai_json(content: str):
 
 
 def generate_ai_content(client: OpenAI, item):
-    prompt = build_prompt(item)
+    prompt = sanitize_text(build_prompt(item))
     model_name = "gpt-4o" if is_high_priority(item) else "gpt-4o-mini"
 
-    payload = {
-        "model": model_name,
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.2,
-    }
+    messages = [
+        {
+            "role": "user",
+            "content": prompt,
+        }
+    ]
 
     try:
-        safe_json_check(payload)
+        safe_json_check(
+            {
+                "model": model_name,
+                "messages": messages,
+                "temperature": 0.2,
+            }
+        )
     except Exception as e:
         print(f"❌ Local JSON check failed for: {item.get('title')}")
         debug_bad_item(item, prompt)
         print("JSON ERROR:", repr(e))
+        print("SANITIZED PROMPT LENGTH:", len(sanitize_text(prompt)))
         return {
             "summary": fallback_summary(item),
             "description": fallback_description(item),
@@ -538,19 +620,42 @@ def generate_ai_content(client: OpenAI, item):
         }
 
     try:
-        response = client.chat.completions.create(**payload)
+        response = client.chat.completions.create(
+            model=model_name,
+            messages=messages,
+            temperature=0.2,
+        )
     except Exception as e:
         print(f"❌ API request failed for: {item.get('title')}")
         debug_bad_item(item, prompt)
         print("API ERROR:", repr(e))
-        return {
-            "summary": fallback_summary(item),
-            "description": fallback_description(item),
-            "highlights": fallback_highlights(item),
-            "_status": "fallback_error",
-        }
 
-    content = (response.choices[0].message.content or "").strip()
+        # 二次兜底：把 prompt 截断后再试一次
+        try:
+            short_prompt = sanitize_text(prompt[:12000])
+            short_messages = [
+                {
+                    "role": "user",
+                    "content": short_prompt,
+                }
+            ]
+
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=short_messages,
+                temperature=0.2,
+            )
+        except Exception as e2:
+            print(f"❌ Retry API request failed for: {item.get('title')}")
+            print("RETRY API ERROR:", repr(e2))
+            return {
+                "summary": fallback_summary(item),
+                "description": fallback_description(item),
+                "highlights": fallback_highlights(item),
+                "_status": "fallback_error",
+            }
+
+    content = sanitize_text(response.choices[0].message.content or "")
 
     try:
         parsed = parse_ai_json(content)
@@ -579,6 +684,131 @@ def generate_ai_content(client: OpenAI, item):
             "_status": "fallback_error",
         }
 
+def evaluate_quality(ai, item):
+    score = 0
+    reasons = []
+
+    summary = sanitize_text(ai.get("summary", ""))
+    description = [sanitize_text(x) for x in ai.get("description", []) if sanitize_text(x)]
+    highlights = [sanitize_text(x) for x in ai.get("highlights", []) if sanitize_text(x)]
+    full_text = " ".join([summary] + description + highlights).lower()
+
+    if summary:
+        score += 1
+    else:
+        reasons.append("missing_summary")
+
+    if len(description) >= 2:
+        score += 1
+    else:
+        reasons.append("weak_description_structure")
+
+    if len(highlights) >= 2:
+        score += 1
+    else:
+        reasons.append("too_few_highlights")
+
+    distinct_keywords = [
+        "scale",
+        "archival",
+        "guest curators",
+        "community projects",
+        "figurative sculpture",
+        "performance",
+        "personal interviews",
+        "historical narratives",
+        "time",
+        "collective stories",
+        "fondation cartier",
+    ]
+    distinct_signals = sum(1 for kw in distinct_keywords if kw in full_text)
+
+    if distinct_signals >= 1:
+        score += 1
+    else:
+        reasons.append("not_distinct_enough")
+
+    hard_bad_patterns = [
+        "thought-provoking",
+        "immersive",
+        "focused look",
+        "on view",
+        "humanity",
+        "identity",
+        "human experience",
+        "captivating",
+        "remarkable",
+    ]
+    for p in hard_bad_patterns:
+        if p in full_text:
+            score -= 1
+            reasons.append(f"generic_phrase:{p}")
+
+    soft_template_patterns = [
+        "rich tapestry",
+        "multifaceted exploration",
+        "dynamic environment",
+        "deeper appreciation",
+        "fluidity of time",
+        "multi-dimensional",
+        "transcend conventional boundaries",
+        "immersive experience",
+        "thought-provoking experience",
+        "invites viewers",
+        "inviting viewers",
+        "encourages reflection",
+        "encouraging reflection",
+    ]
+    for p in soft_template_patterns:
+        if p in full_text:
+            score -= 1
+            reasons.append(f"soft_template:{p}")
+
+    if has_unsupported_detail(ai, item):
+        score -= 2
+        reasons.append("unsupported_detail")
+
+    if is_risky_output(ai):
+        score -= 2
+        reasons.append("risky_output")
+
+    highlight_text = " ".join(highlights).lower()
+    highlight_signal_keywords = [
+        "scale",
+        "archival",
+        "guest curators",
+        "community projects",
+        "fondation cartier",
+        "personal interviews",
+        "performance",
+        "collective stories",
+        "time",
+    ]
+
+    if len(highlights) >= 4 and any(kw in highlight_text for kw in highlight_signal_keywords):
+        score += 1
+
+    has_generic_phrase = any(r.startswith("generic_phrase:") for r in reasons)
+    has_unsupported = "unsupported_detail" in reasons
+    has_risky = "risky_output" in reasons
+
+    publishable = score >= 2
+
+    needs_review = (
+        score < 4
+        or has_generic_phrase
+        or has_unsupported
+        or has_risky
+    )
+
+    return {
+        "qualityScore": score,
+        "needsReview": needs_review,
+        "publishable": publishable,
+        "qualityReasons": reasons,
+    }
+
+
 def pick_best_result(results, item):
     scored = []
 
@@ -606,6 +836,7 @@ def pick_best_result(results, item):
 
     return max(fallback_items, key=rank_pair)
 
+
 def enrich_event(client: OpenAI, item, index):
     title = item.get("title", "")
     print(f"⚙️ Generating: {title}")
@@ -613,7 +844,7 @@ def enrich_event(client: OpenAI, item, index):
     attempts = 4 if is_high_priority(item) else 2
     candidates = []
 
-    for i in range(attempts):
+    for _ in range(attempts):
         ai = generate_ai_content(client, item)
         candidates.append(ai)
 
@@ -626,11 +857,11 @@ def enrich_event(client: OpenAI, item, index):
             f"reasons={best_quality['qualityReasons']}"
         )
 
-    return {
+    enriched = {
         "id": item.get("id", 7000 + index),
         "slug": item.get("slug") or generate_slug(title),
         "title": title,
-        "category": item.get("category", "Exhibition"),
+        "category": item.get("category", "Activity"),
         "location": item.get("location"),
         "venue": item.get("venue"),
         "date": item.get("date"),
@@ -641,142 +872,21 @@ def enrich_event(client: OpenAI, item, index):
         "access": item.get("access", ""),
         "source": item.get("source"),
         "sourceUrl": item.get("sourceUrl"),
+        "price": item.get("price", ""),
+        "bookingUrl": item.get("bookingUrl", ""),
+        "startDate": item.get("startDate", ""),
+        "endDate": item.get("endDate", ""),
+        "tags": item.get("tags", []),
+        "area": item.get("area", ""),
+        "language": item.get("language", "en"),
         "needsReview": best_quality["needsReview"],
         "publishable": best_quality["publishable"],
         "qualityScore": best_quality["qualityScore"],
         "qualityReasons": best_quality["qualityReasons"],
     }
 
-def evaluate_quality(ai, item):
-    score = 0
-    reasons = []
+    return normalize_final_event(enriched)
 
-    summary = sanitize_text(ai.get("summary", ""))
-    description = [sanitize_text(x) for x in ai.get("description", []) if sanitize_text(x)]
-    highlights = [sanitize_text(x) for x in ai.get("highlights", []) if sanitize_text(x)]
-    full_text = " ".join([summary] + description + highlights).lower()
-
-    # 结构分
-    if summary:
-        score += 1
-    else:
-        reasons.append("missing_summary")
-
-    if len(description) >= 2:
-        score += 1
-    else:
-        reasons.append("weak_description_structure")
-
-    if len(highlights) >= 3:
-        score += 1
-    else:
-        reasons.append("too_few_highlights")
-
-    # distinctiveness
-    distinct_keywords = [
-        "scale",
-        "archival",
-        "guest curators",
-        "community projects",
-        "figurative sculpture",
-        "performance",
-        "personal interviews",
-        "historical narratives",
-        "time",
-        "collective stories",
-        "fondation cartier",
-    ]
-    distinct_signals = sum(1 for kw in distinct_keywords if kw in full_text)
-
-    if distinct_signals >= 1:
-        score += 1
-    else:
-        reasons.append("not_distinct_enough")
-
-    # 强模板 / 明显低质量表达（只保留真正该拦的）
-    hard_bad_patterns = [
-        "thought-provoking",
-        "immersive",
-        "focused look",
-        "on view",
-        "humanity",
-        "identity",
-        "human experience",
-        "captivating",
-        "remarkable",
-    ]
-    for p in hard_bad_patterns:
-        if p in full_text:
-            score -= 1
-            reasons.append(f"generic_phrase:{p}")
-
-    # 软模板表达：扣分，但不一定致死
-    soft_template_patterns = [
-        "rich tapestry",
-        "multifaceted exploration",
-        "dynamic environment",
-        "deeper appreciation",
-        "fluidity of time",
-        "multi-dimensional",
-        "transcend conventional boundaries",
-        "immersive experience",
-        "thought-provoking experience",
-        "invites viewers",
-        "inviting viewers",
-        "encourages reflection",
-        "encouraging reflection",
-    ]
-    for p in soft_template_patterns:
-        if p in full_text:
-            score -= 1
-            reasons.append(f"soft_template:{p}")
-
-    # unsupported detail 扣分
-    if has_unsupported_detail(ai, item):
-        score -= 2
-        reasons.append("unsupported_detail")
-
-    # risky output 扣分
-    if is_risky_output(ai):
-        score -= 2
-        reasons.append("risky_output")
-
-    # highlight 数量奖励：至少 4 条且有具体信号才加分
-    highlight_text = " ".join(highlights).lower()
-    highlight_signal_keywords = [
-        "scale",
-        "archival",
-        "guest curators",
-        "community projects",
-        "fondation cartier",
-        "personal interviews",
-        "performance",
-        "collective stories",
-        "time",
-    ]
-
-    if len(highlights) >= 4 and any(kw in highlight_text for kw in highlight_signal_keywords):
-        score += 1
-
-    has_generic_phrase = any(r.startswith("generic_phrase:") for r in reasons)
-    has_unsupported = "unsupported_detail" in reasons
-    has_risky = "risky_output" in reasons
-
-    # publish 判定：硬问题不能过；软模板允许少量存在
-    publishable = (
-        score >= 4
-        and not has_generic_phrase
-        and not has_unsupported
-        and not has_risky
-    )
-    needs_review = not publishable
-
-    return {
-        "qualityScore": score,
-        "needsReview": needs_review,
-        "publishable": publishable,
-        "qualityReasons": reasons,
-    }
 
 def dedupe_events(events):
     best_by_source = {}
@@ -802,19 +912,43 @@ def dedupe_events(events):
 
     return list(best_by_source.values())
 
+
 def main():
-    client = get_client()
-    raw_events = load_raw_events()
+    ensure_single_build_instance()
 
-    final_events = []
-    for i, item in enumerate(raw_events):
-        validate_event(item)
-        enriched = enrich_event(client, item, i)
-        final_events.append(enriched)
+    try:
+        print(f"BUILD START pid={os.getpid()} at {time.time()}")
 
-    final_events = dedupe_events(final_events)
-    save_events(final_events)
-    print(f"\n✅ Done! Generated {len(final_events)} deduped events → {OUTPUT_PATH}")
+        client = get_client()
+        raw_events = load_raw_events()
+
+        final_events = []
+        for i, item in enumerate(raw_events):
+            try:
+                validate_event(item)
+                enriched = enrich_event(client, item, i)
+                final_events.append(enriched)
+            except Exception as e:
+                print(f"⚠️ Failed to enrich event {item.get('title', 'Unknown')}: {e}")
+                continue
+
+        final_events = dedupe_events(final_events)
+
+        valid_events = []
+        for event in final_events:
+            try:
+                validate_final_event_schema(event)
+                valid_events.append(event)
+            except ValueError as e:
+                print(f"⚠️ Skipping invalid event {event.get('title', 'Unknown')}: {e}")
+
+        final_events = valid_events
+
+        save_events(final_events)
+        print(f"\n✅ Done! Generated {len(final_events)} deduped events → {OUTPUT_PATH}")
+
+    finally:
+        cleanup_build_lock()
 
 
 if __name__ == "__main__":

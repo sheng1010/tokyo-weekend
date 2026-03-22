@@ -33,6 +33,10 @@ function getEventSlug(item) {
   return item?.slug || generateSlug(item?.title || "");
 }
 
+function getVisibleEvents(events) {
+  return safeArray(events);
+}
+
 function createCard(item) {
   const basePath = getBasePath();
   const itemSlug = getEventSlug(item);
@@ -80,30 +84,84 @@ function createCard(item) {
   `;
 }
 
+function createTopPickCard(item) {
+  const basePath = getBasePath();
+  const itemSlug = getEventSlug(item);
+
+  const isLocalhost =
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "localhost";
+
+  const detailUrl = isLocalhost
+    ? `${basePath}event.html?slug=${itemSlug}`
+    : `${basePath}event/${itemSlug}`;
+
+  return `
+    <a href="${detailUrl}" class="block group h-full">
+      <article class="h-full bg-white rounded-[22px] border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg flex flex-col">
+        <div class="overflow-hidden">
+          <img
+            src="${item.image || getFallbackImage(item)}"
+            alt="${item.title || ""}"
+            class="w-full h-[190px] object-cover transition-transform duration-500 group-hover:scale-105"
+            onerror="this.onerror=null;this.src='${getFallbackImage(item)}';"
+          >
+        </div>
+
+        <div class="p-4 flex flex-col flex-1">
+          <span class="text-[11px] text-red-500 font-semibold uppercase tracking-[0.12em]">
+            ${item.category || ""}
+          </span>
+
+          <h3 class="mt-3 text-[16px] leading-[1.4] font-semibold text-gray-900 min-h-[68px] line-clamp-3">
+            ${item.title || ""}
+          </h3>
+
+          <p class="mt-3 text-gray-500 text-[13px] leading-6 min-h-[72px] line-clamp-3">
+            ${(item.location || "").trim()}${item.date ? ` • ${item.date}` : ""}
+          </p>
+
+          <span class="mt-auto pt-4 inline-block text-[14px] text-red-500 transition-all duration-200 group-hover:translate-x-1">
+            View details →
+          </span>
+        </div>
+      </article>
+    </a>
+  `;
+}
+
 function filterByCategory(events, pageName) {
-  if (pageName === "film") return events.filter((e) => e.category === "Film");
-  if (pageName === "exhibitions") return events.filter((e) => e.category === "Exhibition");
-  if (pageName === "nightlife") return events.filter((e) => e.category === "Nightlife");
-  if (pageName === "events") return events.filter((e) => e.category === "Event");
+  if (pageName === "film") {
+    return events.filter((e) => e.category === "Film");
+  }
+  if (pageName === "exhibitions") {
+    return events.filter((e) => e.category === "Exhibition");
+  }
+  if (pageName === "nightlife") {
+    return events.filter((e) => e.category === "Nightlife");
+  }
+  if (pageName === "activities") {
+    return events.filter((e) => e.category === "Activity");
+  }
   return events;
 }
 
 function getFallbackImage(item) {
-  const text = `${item.location || ""} ${item.source || ""}`.toLowerCase();
+  const category = (item.category || "").toLowerCase();
 
-  if (text.includes("museum of contemporary art tokyo") || text.includes("mot")) {
-    return "/images/fallback/mot-logo.png";
+  if (category === "nightlife") {
+    return "/images/fallback/nightlife.png";
   }
 
-  if (text.includes("mori art museum") || text.includes("mori")) {
-    return "/images/fallback/mori-logo.png";
+  if (category === "film") {
+    return "/images/fallback/film.png";
   }
 
-  if (text.includes("national art center") || text.includes("nact")) {
-    return "/images/fallback/nact-logo.png";
+  if (category === "activity") {
+    return "/images/fallback/activity.png";
   }
 
-  return "/images/fallback/default-museum.png";
+  return "/images/fallback/mot-logo.png";
 }
 
 async function renderCards(pageName) {
@@ -112,7 +170,14 @@ async function renderCards(pageName) {
 
   try {
     const events = await loadEvents();
-    const items = filterByCategory(events, pageName);
+    const visibleEvents = getVisibleEvents(events);
+    const items = filterByCategory(visibleEvents, pageName);
+
+    if (!items.length) {
+      container.innerHTML = `<p class="text-gray-500">No events found.</p>`;
+      return;
+    }
+
     container.innerHTML = items.map(createCard).join("");
   } catch (error) {
     container.innerHTML = `<p class="text-red-500">Failed to load events.</p>`;
@@ -126,8 +191,18 @@ async function renderTopPicks() {
 
   try {
     const events = await loadEvents();
-    const topPicks = events.slice(0, 4);
-    container.innerHTML = topPicks.map(createCard).join("");
+    const visibleEvents = getVisibleEvents(events);
+    const topPicks = visibleEvents
+      .slice()
+      .sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0))
+      .slice(0, 4);
+
+    if (!topPicks.length) {
+      container.innerHTML = `<p class="text-gray-500">No top picks available.</p>`;
+      return;
+    }
+
+    container.innerHTML = topPicks.map(createTopPickCard).join("");
   } catch (error) {
     container.innerHTML = `<p class="text-red-500">Failed to load top picks.</p>`;
     console.error(error);
@@ -153,10 +228,11 @@ async function renderEventDetail() {
 
   try {
     const events = await loadEvents();
+    const visibleEvents = getVisibleEvents(events);
 
     const event = slug
-      ? events.find((e) => getEventSlug(e) === slug)
-      : events.find((e) => e.id === id);
+      ? visibleEvents.find((e) => getEventSlug(e) === slug)
+      : visibleEvents.find((e) => e.id === id);
 
     if (!event) {
       titleEl.innerText = "Event not found";
@@ -269,22 +345,16 @@ async function renderEventDetail() {
 
     const highlightsEl = document.getElementById("event-highlights");
     if (highlightsEl) {
-      if (highlightsList.length > 0) {
-        highlightsEl.innerHTML = highlightsList
-          .map(
-            (item) => `
-            <li class="flex items-start gap-3">
-              <span class="mt-[8px] w-2.5 h-2.5 bg-red-500 rounded-full shrink-0"></span>
-              <span class="text-[15px] md:text-lg leading-[1.75] text-gray-800">
-                ${item}
-              </span>
-            </li>
-          `
-          )
-          .join("");
-      } else if (highlightsEl.parentElement) {
-        highlightsEl.parentElement.style.display = "none";
-      }
+      highlightsEl.innerHTML = "";
+      highlightsList.forEach((text) => {
+        const li = document.createElement("li");
+        li.className = "flex items-start gap-3 text-[15px] leading-[1.42] text-gray-800";
+        li.innerHTML = `
+          <span class="w-2 h-2 bg-red-500 rounded-full mt-[7px] shrink-0"></span>
+          <span>${text}</span>
+        `;
+        highlightsEl.appendChild(li);
+      });
     }
 
     const sourceEl = document.getElementById("event-source");
@@ -308,19 +378,23 @@ async function renderEventDetail() {
 }
 
 async function loadHeader() {
-  const res = await fetch("/components/header.html");
-  if (!res.ok) {
-    throw new Error("Failed to load header component");
+  try {
+    const res = await fetch("/components/header.html");
+    if (!res.ok) {
+      throw new Error("Failed to load header component");
+    }
+
+    const html = await res.text();
+    const headerEl = document.getElementById("header");
+
+    if (headerEl) {
+      headerEl.innerHTML = html;
+    }
+
+    initMenu();
+  } catch (error) {
+    console.error(error);
   }
-
-  const html = await res.text();
-  const headerEl = document.getElementById("header");
-
-  if (headerEl) {
-    headerEl.innerHTML = html;
-  }
-
-  initMenu();
 }
 
 function initMenu() {
@@ -365,7 +439,10 @@ function initMenu() {
 }
 
 // Page entry
-const isDetailPage = window.location.pathname.includes("event.html");
-if (isDetailPage) {
+const path = window.location.pathname;
+
+if (path.includes("event.html") || path.startsWith("/event/")) {
   renderEventDetail();
+} else {
+  renderTopPicks();
 }

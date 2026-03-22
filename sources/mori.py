@@ -1,10 +1,11 @@
+import re
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
 from utils.common_utils import normalize_text
 from utils.score_utils import calculate_exhibition_score
-import re
+
 
 # =========================
 # 展览来源 Mori Art Museum
@@ -13,16 +14,16 @@ import re
 def fetch_mori_exhibitions(start_id=7001):
     """
     从 Mori Art Museum 英文展览页抓取当前和即将开始的展览。
+    同时进入详情页抓取 rawDescription，供 build_events.py 使用。
     """
     base_url = "https://www.mori.art.museum/en/exhibitions/"
     print(f"[MORI] Fetching {base_url}")
 
+    session = requests.Session()
+    session.headers.update({"User-Agent": "Mozilla/5.0"})
+
     try:
-        response = requests.get(
-            base_url,
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=30,
-        )
+        response = session.get(base_url, timeout=30)
         response.raise_for_status()
     except Exception as exc:
         print(f"[MORI] Error fetching page: {exc}")
@@ -119,6 +120,80 @@ def fetch_mori_exhibitions(start_id=7001):
 
         return ""
 
+    def fetch_detail_description(detail_url: str):
+        """
+        进入 Mori 展览详情页抓取正文段落，返回 rawDescription 列表。
+        """
+        if not detail_url:
+            return []
+
+        try:
+            resp = session.get(detail_url, timeout=20)
+            resp.raise_for_status()
+        except Exception as exc:
+            print(f"[MORI] Detail fetch failed: {detail_url} | {exc}")
+            return []
+
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        candidates = [
+            ".exhibition-body p",
+            ".contents p",
+            ".content p",
+            "main p",
+            "article p",
+        ]
+
+        texts = []
+        seen_texts = set()
+
+        for selector in candidates:
+            paragraphs = soup.select(selector)
+            if not paragraphs:
+                continue
+
+            for p in paragraphs:
+                text = normalize_space(p.get_text(" ", strip=True))
+                lower = text.lower()
+
+                if not text:
+                    continue
+                if len(text) < 40:
+                    continue
+
+                # 过滤明显无用内容
+                if any(bad in lower for bad in [
+                    "share",
+                    "facebook",
+                    "twitter",
+                    "instagram",
+                    "related programs",
+                    "ticket",
+                    "admission",
+                    "hours",
+                    "closed",
+                    "contact",
+                    "access",
+                    "copyright",
+                ]):
+                    continue
+
+                if text in seen_texts:
+                    continue
+
+                seen_texts.add(text)
+                texts.append(text)
+
+            if len(texts) >= 2:
+                break
+
+        if texts:
+            print(f"[MORI] Detail description found: {len(texts)} paragraphs")
+        else:
+            print(f"[MORI] No detail description found: {detail_url}")
+
+        return texts[:6]
+
     def append_item(title, date_text, href, img_src, section):
         nonlocal next_id
 
@@ -131,23 +206,29 @@ def fetch_mori_exhibitions(start_id=7001):
             return
         seen.add(key)
 
-        section_label_map = {
-            "current": "Current Exhibition",
-            "also_on_view": "Also on View",
-            "upcoming": "Upcoming Exhibition",
-        }
+        detail_url = make_absolute(href)
+        raw_description = fetch_detail_description(detail_url)
 
         record = {
             "id": next_id,
+            "slug": re.sub(r"-+", "-", re.sub(r"[^\w\s-]", "", title.lower()).replace("&", " and ").strip().replace(" ", "-")).strip("-"),
             "title": title,
             "category": "Exhibition",
             "location": "Mori Art Museum (Roppongi Hills)",
             "venue": "Mori Art Museum",
             "date": date_text or "See source",
-            "image": img_src or "https://picsum.photos/seed/mori-exhibition/400/200",
-            "description": f"{section_label_map.get(section, 'Exhibition')} at Mori Art Museum",
+            "startDate": "",
+            "endDate": "",
+            "image": img_src or "",
+            "access": "Roppongi Station (Hibiya Line / Oedo Line), direct access to Roppongi Hills",
+            "price": "",
+            "bookingUrl": "",
             "source": "Mori Art Museum",
-            "sourceUrl": make_absolute(href) if href else base_url,
+            "sourceUrl": detail_url if detail_url else base_url,
+            "tags": [],
+            "area": "Roppongi",
+            "language": "en",
+            "rawDescription": raw_description,
             "sources": ["Mori Art Museum"],
             "popularity": 0,
             "bookmarkCount": 0,
