@@ -1,14 +1,9 @@
 # =========================
-# 通用工具函数
+# Common helpers
 # =========================
 
-def safe_get(dct, path, default=""):
-    """
-    安全地从嵌套 dict 中取值。
 
-    例：
-        safe_get(item, ["venue", "fields", "fullName"], "Tokyo")
-    """
+def safe_get(dct, path, default=""):
     current = dct
     for key in path:
         if isinstance(current, dict) and key in current:
@@ -19,14 +14,6 @@ def safe_get(dct, path, default=""):
 
 
 def normalize_text(s):
-    """
-    文本标准化：
-    - 转小写
-    - 统一引号
-    - 去掉多余空格
-
-    用于去重时生成 key。
-    """
     if not s:
         return ""
 
@@ -37,3 +24,18 @@ def normalize_text(s):
         .replace("’", "'")
         .split()
     )
+
+
+def repair_text_encoding(value):
+    if not isinstance(value, str) or not value:
+        return value
+
+    suspicious = ("Ã", "Â", "â", "æ", "ï", "¤", "£", "¡")
+    if not any(token in value for token in suspicious):
+        return value
+
+    try:
+        repaired = value.encode("latin-1").decode("utf-8")
+        return repaired or value
+    except Exception:
+        return value

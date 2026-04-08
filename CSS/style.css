@@ -3,3 +3,36 @@
   height: 220px;
   object-fit: cover;
 }
+
+.tw-language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  border-radius: 9999px;
+  background: rgba(249, 250, 251, 0.92);
+}
+
+.tw-language-switcher button {
+  border: 0;
+  background: transparent;
+  color: #4b5563;
+  border-radius: 9999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tw-language-switcher button:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #111827;
+}
+
+.tw-language-switcher button.is-active {
+  background: #ef4444;
+  color: #ffffff;
+}

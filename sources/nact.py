@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import re
 
 from utils.common_utils import normalize_text
+from utils.http_utils import create_session
 from utils.score_utils import calculate_exhibition_score
 
 
@@ -99,8 +100,7 @@ def fetch_nact_exhibitions(start_id=6001):
 
     print(f"[NACT] Fetching {base_url}")
 
-    session = requests.Session()
-    session.headers.update({"User-Agent": "Mozilla/5.0"})
+    session = create_session()
 
     try:
         resp = session.get(base_url, timeout=30)
