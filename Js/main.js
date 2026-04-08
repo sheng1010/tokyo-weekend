@@ -435,9 +435,37 @@ function getVisibleEvents(events) {
   return safeArray(events).filter(hasRealImage);
 }
 
+function getCardMediaMarkup(item, options = {}) {
+  const imageSrc = escapeHtml(item.image || getFallbackImage(item));
+  const fallbackSrc = escapeHtml(getFallbackImage(item));
+  const altText = escapeHtml(item.title || "");
+  const extraClasses = options.extraClasses ? ` ${options.extraClasses}` : "";
+  const sizeClasses = options.sizeClasses || "";
+  const overlayClass =
+    options.overlayClass ||
+    "absolute inset-0 bg-gradient-to-t from-black/8 via-transparent to-transparent pointer-events-none";
+
+  return `
+    <div
+      class="tw-card-media${extraClasses} ${sizeClasses}"
+      style="--tw-card-image:url('${imageSrc}')"
+    >
+      <div class="tw-card-media__backdrop" aria-hidden="true"></div>
+      <img
+        src="${imageSrc}"
+        alt="${altText}"
+        class="w-full h-full"
+        onerror="this.onerror=null;this.src='${fallbackSrc}';"
+      >
+      <div class="${overlayClass}"></div>
+    </div>
+  `;
+}
+
 function createCard(item) {
   const basePath = getBasePath();
   const itemSlug = getEventSlug(item);
+  const category = getCategoryKey(item);
 
   const isLocalhost =
     window.location.hostname === "127.0.0.1" ||
@@ -447,26 +475,23 @@ function createCard(item) {
     ? `${basePath}event.html?slug=${itemSlug}`
     : `${basePath}event/${itemSlug}`;
 
+  const mediaMarkup = getCardMediaMarkup(item, {
+    extraClasses: category === "exhibition" ? " tw-card-media--exhibition" : "",
+    sizeClasses: "aspect-[4/2.45]"
+  });
+
   return `
   <a
     href="${detailUrl}"
     class="group block h-full"
   >
     <article class="h-full bg-white rounded-[24px] border border-gray-200/80 shadow-sm overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-gray-300">
-      <div class="relative aspect-[4/2.45] overflow-hidden bg-gray-100">
-        <img
-          src="${item.image || getFallbackImage(item)}"
-          alt="${item.title || ""}"
-          class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-          onerror="this.onerror=null;this.src='${getFallbackImage(item)}';"
-        >
-        <div class="absolute inset-0 bg-gradient-to-t from-black/8 via-transparent to-transparent pointer-events-none"></div>
-      </div>
+      ${mediaMarkup}
 
       <div class="px-6 pt-5 pb-5 flex flex-col">
-        <span class="text-[11px] leading-none text-red-500 font-semibold uppercase tracking-[0.14em]">
-          ${item.categoryLabel || item.category || ""}
-        </span>
+          <span class="tw-category-pill" data-category="${category}">
+            ${item.categoryLabel || item.category || ""}
+          </span>
 
         <h3 class="mt-3 text-[18px] leading-[1.32] font-semibold text-gray-900 line-clamp-2">
           ${item.title || ""}
@@ -488,6 +513,7 @@ function createCard(item) {
 function createTopPickCard(item) {
   const basePath = getBasePath();
   const itemSlug = getEventSlug(item);
+  const category = getCategoryKey(item);
 
   const isLocalhost =
     window.location.hostname === "127.0.0.1" ||
@@ -497,22 +523,21 @@ function createTopPickCard(item) {
     ? `${basePath}event.html?slug=${itemSlug}`
     : `${basePath}event/${itemSlug}`;
 
+  const mediaMarkup = getCardMediaMarkup(item, {
+    extraClasses: ` tw-card-media--top-pick${category === "exhibition" ? " tw-card-media--exhibition" : ""}`,
+    sizeClasses: "h-[190px]",
+    overlayClass: "absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none"
+  });
+
   return `
     <a href="${detailUrl}" class="block group h-full">
       <article class="h-full bg-white rounded-[22px] border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg flex flex-col">
-        <div class="overflow-hidden">
-          <img
-            src="${item.image || getFallbackImage(item)}"
-            alt="${item.title || ""}"
-            class="w-full h-[190px] object-cover transition-transform duration-500 group-hover:scale-105"
-            onerror="this.onerror=null;this.src='${getFallbackImage(item)}';"
-          >
-        </div>
+        ${mediaMarkup}
 
         <div class="p-4 flex flex-col flex-1">
-          <span class="text-[11px] text-red-500 font-semibold uppercase tracking-[0.12em]">
-            ${item.categoryLabel || item.category || ""}
-          </span>
+            <span class="tw-category-pill" data-category="${category}">
+              ${item.categoryLabel || item.category || ""}
+            </span>
 
           <h3 class="mt-3 text-[16px] leading-[1.4] font-semibold text-gray-900 min-h-[68px] line-clamp-3">
             ${item.title || ""}
@@ -746,6 +771,7 @@ async function renderEventDetail() {
     const categoryEl = document.getElementById("event-category");
     if (categoryEl) {
       categoryEl.innerText = event.categoryLabel || event.category || "";
+      categoryEl.dataset.category = getCategoryKey(sourceEvent);
     }
 
     titleEl.innerText = event.title || "";

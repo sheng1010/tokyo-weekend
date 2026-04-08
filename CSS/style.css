@@ -4,6 +4,53 @@
   object-fit: cover;
 }
 
+.tw-card-media {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.65), transparent 58%),
+    linear-gradient(180deg, #f4f1ec 0%, #efebe5 100%);
+  --tw-card-zoom: 1.08;
+  --tw-card-hover-zoom: 1.12;
+}
+
+.tw-card-media--top-pick {
+  --tw-card-zoom: 1.06;
+  --tw-card-hover-zoom: 1.1;
+}
+
+.tw-card-media--exhibition {
+  --tw-card-zoom: 1.04;
+  --tw-card-hover-zoom: 1.08;
+}
+
+.tw-card-media__backdrop {
+  position: absolute;
+  inset: -8%;
+  background-image: var(--tw-card-image);
+  background-position: center;
+  background-size: cover;
+  filter: blur(28px) saturate(0.96);
+  opacity: 0.34;
+  transform: scale(1.2);
+}
+
+.tw-card-media > img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(var(--tw-card-zoom));
+  transition: transform 700ms ease-out;
+}
+
+.group:hover .tw-card-media > img {
+  transform: scale(var(--tw-card-hover-zoom));
+}
+
 .tw-language-switcher {
   display: inline-flex;
   align-items: center;
@@ -35,4 +82,52 @@
 .tw-language-switcher button.is-active {
   background: #ef4444;
   color: #ffffff;
+}
+
+.tw-category-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.tw-category-pill[data-category="film"] {
+  background: #f6e5ea;
+  border-color: #efd0d8;
+  color: #a53d5a;
+}
+
+.tw-category-pill[data-category="exhibition"] {
+  background: #e7f0f5;
+  border-color: #cfdee8;
+  color: #2f6885;
+}
+
+.tw-category-pill[data-category="nightlife"] {
+  background: #f5e7d8;
+  border-color: #eed7bb;
+  color: #c37027;
+}
+
+.tw-category-pill[data-category="activity"] {
+  background: #e8f1e3;
+  border-color: #d5e3cb;
+  color: #5f8756;
+}
+
+#event-category.tw-category-pill {
+  min-height: 38px;
+  padding: 0 18px;
+  margin-bottom: 14px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
 }
