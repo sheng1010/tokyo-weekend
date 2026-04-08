@@ -6,6 +6,11 @@ import time
 import subprocess
 
 from sources.mori import fetch_mori_exhibitions
+from sources.sompo import fetch_sompo_exhibitions
+from sources.artizon import fetch_artizon_exhibitions
+from sources.momat import fetch_momat_exhibitions
+from sources.nmwa import fetch_nmwa_exhibitions
+from sources.designsight_2121 import fetch_2121_exhibitions
 from sources.tobikan import fetch_tobikan_exhibitions
 from sources.mot import fetch_mot_exhibitions
 from sources.tnm import fetch_tnm_exhibitions
@@ -275,6 +280,11 @@ def main():
 
         mori_exhibitions = []
         tobikan_exhibitions = []
+        sompo_exhibitions = []
+        artizon_exhibitions = []
+        momat_exhibitions = []
+        nmwa_exhibitions = []
+        designsight_exhibitions = []
         mot_exhibitions = []
         tnm_exhibitions = []
         nact_exhibitions = []
@@ -297,6 +307,41 @@ def main():
             print("after tobikan exhibitions:", len(tobikan_exhibitions))
         except Exception as e:
             print("[TOBIKAN] failed:", e)
+
+        try:
+            print("before sompo exhibitions")
+            sompo_exhibitions = fetch_sompo_exhibitions()
+            print("after sompo exhibitions:", len(sompo_exhibitions))
+        except Exception as e:
+            print("[SOMPO] failed:", e)
+
+        try:
+            print("before artizon exhibitions")
+            artizon_exhibitions = fetch_artizon_exhibitions()
+            print("after artizon exhibitions:", len(artizon_exhibitions))
+        except Exception as e:
+            print("[ARTIZON] failed:", e)
+
+        try:
+            print("before momat exhibitions")
+            momat_exhibitions = fetch_momat_exhibitions()
+            print("after momat exhibitions:", len(momat_exhibitions))
+        except Exception as e:
+            print("[MOMAT] failed:", e)
+
+        try:
+            print("before nmwa exhibitions")
+            nmwa_exhibitions = fetch_nmwa_exhibitions()
+            print("after nmwa exhibitions:", len(nmwa_exhibitions))
+        except Exception as e:
+            print("[NMWA] failed:", e)
+
+        try:
+            print("before 2121 exhibitions")
+            designsight_exhibitions = fetch_2121_exhibitions()
+            print("after 2121 exhibitions:", len(designsight_exhibitions))
+        except Exception as e:
+            print("[2121] failed:", e)
 
         try:
             print("before mot exhibitions")
@@ -357,6 +402,11 @@ def main():
         merged_exhibitions = merge_exhibitions(
             mori_exhibitions,
             tobikan_exhibitions,
+            sompo_exhibitions,
+            artizon_exhibitions,
+            momat_exhibitions,
+            nmwa_exhibitions,
+            designsight_exhibitions,
             mot_exhibitions,
             tnm_exhibitions,
             nact_exhibitions,

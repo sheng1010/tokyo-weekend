@@ -4,6 +4,7 @@ import math
 import os
 import sys
 import time
+import hashlib
 from openai import OpenAI
 
 from utils.common_utils import repair_text_encoding
@@ -23,9 +24,11 @@ if hasattr(sys.stderr, "reconfigure"):
 
 RAW_INPUT_PATH = "data/raw_events.json"
 OUTPUT_PATH = "data/generated_events.json"
+CACHE_PATH = "data/generated_events_cache.json"
 BUILD_SELF_LOCK_FILE = "build_events_self.lock"
 NORMAL_AI_ATTEMPTS = max(1, int(os.environ.get("TOKYOWEEKEND_AI_ATTEMPTS_NORMAL", "1")))
 HIGH_PRIORITY_AI_ATTEMPTS = max(1, int(os.environ.get("TOKYOWEEKEND_AI_ATTEMPTS_HIGH", "2")))
+CACHE_VERSION = "editorial-v2"
 
 
 def parse_lock_pid(lock_path: str) -> int | None:
@@ -602,11 +605,111 @@ def save_events(events):
         json.dump(events, f, ensure_ascii=False, indent=2)
 
 
+def load_generation_cache():
+    if not os.path.exists(CACHE_PATH):
+        return {}
+
+    try:
+        with open(CACHE_PATH, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+    except Exception:
+        return {}
+
+    if not isinstance(payload, dict):
+        return {}
+
+    entries = payload.get("entries", {})
+    return entries if isinstance(entries, dict) else {}
+
+
+def save_generation_cache(cache_entries):
+    payload = {
+        "version": CACHE_VERSION,
+        "updatedAt": int(time.time()),
+        "entries": cache_entries,
+    }
+    with open(CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+
+
 def validate_event(item):
     required_fields = ["title", "venue", "date", "location", "rawDescription"]
     for f in required_fields:
         if not item.get(f):
             print(f"[WARN] Missing field: {f} in {item.get('title')}")
+
+
+def compress_raw_description(item, max_chars=900) -> str:
+    raw = item.get("rawDescription", [])
+    parts = normalize_list(raw)
+    if not parts:
+        return ""
+
+    category = normalize_category(item.get("category"))
+    cleaned_parts = []
+    seen = set()
+
+    for part in parts:
+        text = compact_spaces(part)
+        if not text:
+            continue
+        lower = text.lower()
+        if lower in seen:
+            continue
+        seen.add(lower)
+
+        if category == "Nightlife":
+            if any(marker in lower for marker in ("ticket", "admission", "door open", "open:", "start:", "access")):
+                continue
+        if category == "Exhibition":
+            if any(marker in lower for marker in ("admission", "same-day tickets", "online ticket", "closed on", "hours")):
+                continue
+        if category == "Film":
+            if lower.startswith("cast:") or lower.startswith("director:"):
+                continue
+
+        cleaned_parts.append(text)
+
+    if not cleaned_parts:
+        cleaned_parts = parts[:]
+
+    if category == "Nightlife":
+        selected = cleaned_parts[:2]
+    elif category == "Film":
+        selected = cleaned_parts[:2]
+    else:
+        selected = cleaned_parts[:3]
+
+    clipped = []
+    total = 0
+    for part in selected:
+        if len(part) > 320:
+            part = part[:320].rsplit(" ", 1)[0].strip() + "..."
+        projected = total + len(part) + (4 if clipped else 0)
+        if projected > max_chars and clipped:
+            break
+        clipped.append(part)
+        total = projected
+
+    return "\n\n".join(clipped)[:max_chars]
+
+
+def build_generation_fingerprint(item) -> str:
+    payload = {
+        "v": CACHE_VERSION,
+        "title": sanitize_text(item.get("title", "")),
+        "category": normalize_category(item.get("category")),
+        "venue": sanitize_text(item.get("venue", "")),
+        "location": sanitize_text(item.get("location", "")),
+        "date": sanitize_text(item.get("date", "")),
+        "sourceUrl": sanitize_text(item.get("sourceUrl", "")),
+        "director": sanitize_text(item.get("director", "")),
+        "cast": sanitize_text(item.get("cast", "")),
+        "screeningVenues": item.get("screeningVenues", []),
+        "raw": compress_raw_description(item, 1200),
+    }
+    serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
 def is_high_priority(item) -> bool:
@@ -642,7 +745,7 @@ def build_prompt(item):
         if is_high_priority(item)
         else EDITORIAL_PROMPT_TEMPLATE_SAFE
     )
-    raw_text = sanitize_text(raw_description_text(item))
+    raw_text = sanitize_text(compress_raw_description(item))
     extra_context = build_extra_prompt_context(item)
 
     return template.format(
@@ -1541,7 +1644,7 @@ def generate_ai_content(client: OpenAI, item):
         }
 
     prompt = sanitize_text(build_prompt(item))
-    model_name = "gpt-4o" if is_high_priority(item) else "gpt-4o-mini"
+    model_name = "gpt-4o-mini" if is_high_priority(item) else "gpt-4o-mini"
 
     messages = [
         {
@@ -1893,6 +1996,7 @@ def main():
         if client is None:
             print("OPENAI_API_KEY not found, using fallback event copy generation.")
         raw_events = load_raw_events()
+        cache_entries = load_generation_cache()
         total_events = len(raw_events)
         print(
             f"[INFO] Loaded {total_events} raw events | "
@@ -1908,7 +2012,14 @@ def main():
                     f"[PROGRESS] {i + 1}/{total_events} | "
                     f"{item.get('category', 'Unknown')} | {item.get('title', 'Unknown')}"
                 )
-                enriched = enrich_event(client, item, i)
+                fingerprint = build_generation_fingerprint(item)
+                cached = cache_entries.get(fingerprint)
+                if cached:
+                    enriched = normalize_final_event(cached)
+                    print(f"[CACHE] Reusing generated copy for: {item.get('title', 'Unknown')}")
+                else:
+                    enriched = enrich_event(client, item, i)
+                    cache_entries[fingerprint] = enriched
                 final_events.append(enriched)
             except Exception as e:
                 print(f"[WARN] Failed to enrich event {item.get('title', 'Unknown')}: {e}")
@@ -1927,6 +2038,7 @@ def main():
         final_events = valid_events
 
         save_events(final_events)
+        save_generation_cache(cache_entries)
         print(f"\n[DONE] Generated {len(final_events)} deduped events -> {OUTPUT_PATH}")
 
     finally:
