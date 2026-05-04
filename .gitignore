@@ -27,3 +27,4 @@ debug_next_data.json
 # Data (generated / runtime)
 data/raw_events.json
 data/generated_events.json
+data/generated_events_cache.json
