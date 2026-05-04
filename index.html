@@ -41,10 +41,9 @@
   </footer>
 
   <script src="./Js/main.js"></script>
-  <script>
-    (async function () {
-      await initializePage("home");
-    })();
+  <script type="module">
+    import { bootstrapPage } from "./Js/firebase-auth.js";
+    await bootstrapPage("home");
   </script>
 </body>
 </html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Calendar | Tokyo Weekend</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../CSS/style.css" />
+</head>
+<body class="bg-gray-50 text-gray-900" data-page="account">
+  <div id="header"></div>
+
+  <main class="tw-account-home">
+    <section class="tw-account-home__hero">
+      <p class="tw-account-home__eyebrow" data-i18n="accountHome.eyebrow">Personal planner</p>
+      <div class="tw-account-home__hero-grid">
+        <div>
+          <h1 class="tw-account-home__title" data-i18n="accountHome.title">My Weekend Calendar</h1>
+          <p class="tw-account-home__subtitle" data-i18n="accountHome.subtitle">
+            Use this calendar as your home base for planning. Later, you'll be able to attach Tokyo Weekend activities directly to each day.
+          </p>
+        </div>
+
+        <div class="tw-account-home__status-card" id="account-auth-status"></div>
+      </div>
+    </section>
+
+    <section class="tw-account-layout">
+      <div class="tw-calendar-shell">
+        <div class="tw-calendar-shell__header">
+          <div>
+            <p class="tw-calendar-shell__eyebrow" data-i18n="accountHome.monthLabel">Calendar</p>
+            <h2 id="account-calendar-month" class="tw-calendar-shell__title">May 2026</h2>
+          </div>
+
+          <div class="tw-calendar-shell__controls">
+            <button type="button" class="tw-calendar-shell__button" id="calendar-prev" aria-label="Previous month">
+              Prev
+            </button>
+            <button type="button" class="tw-calendar-shell__button" id="calendar-today" data-i18n="accountHome.todayAction">
+              Today
+            </button>
+            <button type="button" class="tw-calendar-shell__button" id="calendar-next" aria-label="Next month">
+              Next
+            </button>
+          </div>
+        </div>
+
+        <div id="account-calendar-weekdays" class="tw-calendar-weekdays"></div>
+        <div id="account-calendar-grid" class="tw-calendar-grid"></div>
+      </div>
+
+      <aside class="tw-account-sidebar">
+        <section class="tw-account-panel">
+          <p class="tw-account-panel__eyebrow" data-i18n="accountHome.selectedDayTitle">Selected day</p>
+          <h2 id="account-selected-day" class="tw-account-panel__title">Friday, May 8</h2>
+          <p id="account-selected-summary" class="tw-account-panel__body">
+            No linked activities yet.
+          </p>
+          <span class="tw-account-chip" data-i18n="accountHome.placeholderBadge">Coming soon</span>
+        </section>
+
+        <section class="tw-account-panel">
+          <div class="tw-account-panel__row">
+            <p class="tw-account-panel__eyebrow" data-i18n="accountHome.linkedActivitiesTitle">Linked activities</p>
+            <span id="account-selected-count" class="tw-account-panel__count">0</span>
+          </div>
+          <div id="account-linked-activities" class="tw-linked-activities"></div>
+        </section>
+
+        <section class="tw-account-panel">
+          <p class="tw-account-panel__eyebrow" data-i18n="accountHome.scheduleTitle">Daily structure</p>
+          <div id="account-day-plan" class="tw-day-plan"></div>
+        </section>
+
+        <section class="tw-account-panel">
+          <p class="tw-account-panel__eyebrow" data-i18n="accountHome.ideasTitle">What this page will support later</p>
+          <div class="tw-account-notes">
+            <p data-i18n="accountHome.ideasOne">Attach screenings, exhibitions, nightlife plans, and activities to exact dates.</p>
+            <p data-i18n="accountHome.ideasTwo">Keep a clear day-by-day view of what is confirmed and what is still just an idea.</p>
+            <p data-i18n="accountHome.ideasThree">Use the side panel for notes, saved combinations, and quick planning context.</p>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <script src="../Js/main.js"></script>
+  <script type="module">
+    import { bootstrapPage } from "../Js/firebase-auth.js";
+    import { initializeAccountHome } from "../Js/account-home.js";
+
+    await bootstrapPage("account");
+    initializeAccountHome();
+  </script>
+</body>
+</html>

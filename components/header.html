@@ -18,8 +18,8 @@
       </a>
     </div>
 
-    <div class="hidden md:flex items-center gap-6">
-      <nav class="flex space-x-10 text-sm font-medium">
+    <div class="hidden md:flex items-center gap-5">
+      <nav class="flex items-center gap-8 text-sm font-medium xl:gap-10">
         <a href="/index.html" class="hover:text-red-500 transition-colors" data-i18n="nav.home">Home</a>
         <a href="/pages/film.html" class="hover:text-red-500 transition-colors" data-i18n="nav.film">Film</a>
         <a href="/pages/exhibitions.html" class="hover:text-red-500 transition-colors" data-i18n="nav.exhibitions">Exhibitions</a>
@@ -27,10 +27,14 @@
         <a href="/pages/activities.html" class="hover:text-red-500 transition-colors" data-i18n="nav.activities">Activities</a>
       </nav>
 
-      <div class="tw-language-switcher" data-i18n-aria-label="common.languageSwitcher" aria-label="Language">
+      <div class="flex items-center gap-4">
+        <div id="header-auth-desktop" class="tw-header-auth" aria-live="polite"></div>
+
+        <div class="tw-language-switcher" data-i18n-aria-label="common.languageSwitcher" aria-label="Language">
         <button type="button" data-lang-switch="zh">中文</button>
         <button type="button" data-lang-switch="ja">JP</button>
         <button type="button" data-lang-switch="en">EN</button>
+        </div>
       </div>
     </div>
   </div>
@@ -98,6 +102,10 @@
     >
       Activities
     </a>
+
+    <div class="border-t border-zinc-700 my-6"></div>
+
+    <div id="header-auth-mobile" class="tw-mobile-auth" aria-live="polite"></div>
 
     <div class="border-t border-zinc-700 my-6"></div>
 

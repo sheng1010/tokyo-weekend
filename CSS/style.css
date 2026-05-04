@@ -59,6 +59,7 @@
   border: 1px solid rgba(17, 24, 39, 0.1);
   border-radius: 9999px;
   background: rgba(249, 250, 251, 0.92);
+  flex-shrink: 0;
 }
 
 .tw-language-switcher button {
@@ -130,4 +131,924 @@
   margin-bottom: 14px;
   font-size: 11px;
   letter-spacing: 0.16em;
+}
+
+.tw-header-auth {
+  flex-shrink: 0;
+}
+
+.tw-header-auth__actions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.tw-header-auth__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.tw-account-menu__link {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: color 0.2s ease;
+}
+
+.tw-header-auth__link:hover,
+.tw-account-menu__link:hover {
+  color: #ef4444;
+}
+
+.tw-header-auth__link:hover {
+  border-color: rgba(239, 68, 68, 0.18);
+  background: rgba(254, 242, 242, 0.7);
+}
+
+.tw-header-auth__button,
+.tw-mobile-auth__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: background 0.2s ease;
+}
+
+.tw-header-auth__button:hover,
+.tw-mobile-auth__button:hover {
+  background: #1f2937;
+}
+
+.tw-header-auth__button {
+  min-width: 118px;
+}
+
+.tw-header-auth__button--account {
+  min-width: 122px;
+}
+
+.tw-account-shell {
+  position: relative;
+}
+
+.tw-account-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 9999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  transition: border-color 0.2s ease;
+}
+
+.tw-account-trigger:hover {
+  border-color: rgba(15, 23, 42, 0.16);
+}
+
+.tw-account-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.tw-account-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tw-account-copy strong {
+  max-width: 148px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #111827;
+  font-size: 13px;
+}
+
+.tw-account-copy span {
+  color: #6b7280;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+}
+
+.tw-account-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 260px;
+  padding: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.tw-account-menu__eyebrow,
+.tw-mobile-auth__eyebrow,
+.tw-auth-panel__eyebrow,
+.tw-auth-success__eyebrow,
+.tw-auth-kicker {
+  margin: 0;
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.tw-account-menu__name,
+.tw-mobile-auth__name {
+  margin: 10px 0 4px;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.tw-account-menu__email,
+.tw-mobile-auth__email {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.tw-account-menu__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.tw-account-menu__signout {
+  border: 0;
+  background: transparent;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tw-account-menu__signout:hover {
+  color: #ef4444;
+}
+
+.tw-mobile-auth__card {
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(39, 39, 42, 0.96);
+}
+
+.tw-mobile-auth__copy {
+  margin: 10px 0 0;
+  color: #d4d4d8;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.tw-mobile-auth__identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tw-mobile-auth__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.tw-mobile-auth__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fafafa;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tw-auth-shell {
+  min-height: calc(100vh - 80px);
+  padding: 56px 16px 72px;
+  background: #f9fafb;
+}
+
+.tw-auth-stage {
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+.tw-auth-panel__frame {
+  border: 1px solid rgba(17, 24, 39, 0.07);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.tw-auth-title {
+  max-width: none;
+  margin: 10px 0 0;
+  color: #111827;
+  font-family: inherit;
+  font-size: 30px;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.tw-auth-panel__frame {
+  padding: 28px 24px;
+}
+
+.tw-auth-panel__helper {
+  margin: 10px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.tw-auth-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 22px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #f3f4f6;
+}
+
+.tw-auth-mode-switch__button {
+  min-height: 42px;
+  border-radius: 10px;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 700;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tw-auth-mode-switch__button.is-active {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.06);
+}
+
+.tw-auth-form,
+.tw-auth-success {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.tw-auth-setup {
+  margin-top: 24px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  background: rgba(255, 251, 235, 0.92);
+}
+
+.tw-auth-setup h2 {
+  margin: 0;
+  color: #92400e;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.tw-auth-setup p {
+  margin: 8px 0 0;
+  color: #a16207;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.tw-auth-field {
+  display: grid;
+  gap: 8px;
+}
+
+.tw-auth-field span {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tw-auth-field input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 12px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 15px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.tw-auth-field input:focus {
+  outline: none;
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
+  background: #ffffff;
+}
+
+.tw-auth-submit,
+.tw-auth-provider {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.tw-auth-submit {
+  background: #111827;
+  color: #ffffff;
+}
+
+.tw-auth-provider {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  background: #ffffff;
+  color: #111827;
+}
+
+.tw-auth-provider--secondary {
+  background: #ffffff;
+}
+
+.tw-auth-submit:hover,
+.tw-auth-provider:hover {
+  border-color: rgba(17, 24, 39, 0.14);
+}
+
+.tw-auth-submit:disabled,
+.tw-auth-provider:disabled,
+.tw-auth-mode-switch__button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.tw-auth-provider__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  background: #f3f4f6;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.tw-auth-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px 0;
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tw-auth-divider::before,
+.tw-auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(17, 24, 39, 0.08);
+}
+
+.tw-auth-divider::before {
+  margin-right: 12px;
+}
+
+.tw-auth-divider::after {
+  margin-left: 12px;
+}
+
+.tw-auth-success {
+  padding: 22px;
+  border-radius: 16px;
+  background: #f9fafb;
+  border: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.tw-auth-success__name {
+  margin: 10px 0 4px;
+  color: #111827;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.tw-auth-success__email {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.tw-auth-success__actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.tw-auth-status {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.tw-auth-status.is-success {
+  background: rgba(220, 252, 231, 0.9);
+  color: #166534;
+}
+
+.tw-auth-status.is-error {
+  background: rgba(254, 226, 226, 0.9);
+  color: #b91c1c;
+}
+
+.tw-auth-status.is-warning {
+  background: rgba(255, 251, 235, 0.94);
+  color: #a16207;
+}
+
+.tw-account-home {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 42px 16px 72px;
+}
+
+.tw-account-home__hero {
+  margin-bottom: 28px;
+}
+
+.tw-account-home__eyebrow,
+.tw-calendar-shell__eyebrow,
+.tw-account-panel__eyebrow {
+  margin: 0;
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.tw-account-home__hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.9fr);
+  gap: 18px;
+  align-items: stretch;
+  margin-top: 12px;
+}
+
+.tw-account-home__title {
+  margin: 0;
+  color: #111827;
+  font-size: clamp(2.4rem, 6vw, 4.8rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
+.tw-account-home__subtitle {
+  max-width: 48rem;
+  margin: 16px 0 0;
+  color: #64748b;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.tw-account-home__status-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.04);
+}
+
+.tw-account-home__status-label {
+  margin: 0;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tw-account-home__status-title {
+  margin: 0;
+  color: #111827;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.tw-account-home__status-copy,
+.tw-account-home__status-note {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.tw-account-home__status-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  width: fit-content;
+  padding: 0 16px;
+  border-radius: 9999px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tw-account-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.85fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.tw-calendar-shell,
+.tw-account-panel {
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 26px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
+}
+
+.tw-calendar-shell {
+  padding: 26px;
+}
+
+.tw-calendar-shell__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.tw-calendar-shell__title {
+  margin: 8px 0 0;
+  color: #111827;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.tw-calendar-shell__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tw-calendar-shell__button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tw-calendar-shell__button:hover {
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+.tw-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tw-calendar-weekdays span {
+  padding: 0 8px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tw-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tw-calendar-day {
+  display: grid;
+  align-content: space-between;
+  min-height: 122px;
+  padding: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 20px;
+  background: #ffffff;
+  color: #111827;
+  text-align: left;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.tw-calendar-day:hover {
+  border-color: rgba(15, 23, 42, 0.14);
+  transform: translateY(-1px);
+}
+
+.tw-calendar-day.is-muted {
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+.tw-calendar-day.is-selected {
+  border-color: rgba(239, 68, 68, 0.24);
+  background: rgba(254, 242, 242, 0.68);
+}
+
+.tw-calendar-day.is-today {
+  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.12);
+}
+
+.tw-calendar-day__number {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.tw-calendar-day__meta {
+  display: block;
+  min-height: 24px;
+}
+
+.tw-calendar-day__count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tw-account-sidebar {
+  display: grid;
+  gap: 16px;
+}
+
+.tw-account-panel {
+  padding: 22px;
+}
+
+.tw-account-panel__title {
+  margin: 10px 0 0;
+  color: #111827;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.tw-account-panel__body {
+  margin: 14px 0 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.tw-account-panel__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tw-account-panel__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tw-account-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  margin-top: 16px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tw-linked-activities,
+.tw-day-plan,
+.tw-account-notes {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.tw-linked-activity,
+.tw-linked-activities__empty,
+.tw-day-plan__row {
+  padding: 14px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+}
+
+.tw-linked-activity__category {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tw-linked-activity h3,
+.tw-linked-activities__empty strong {
+  display: block;
+  margin: 10px 0 0;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.tw-linked-activity p,
+.tw-linked-activities__empty p,
+.tw-account-notes p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.tw-day-plan__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.tw-day-plan__slot {
+  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tw-day-plan__detail {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: right;
+}
+
+@media (max-width: 960px) {
+  .tw-auth-panel__frame {
+    padding: 28px;
+  }
+
+  .tw-account-home__hero-grid,
+  .tw-account-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tw-calendar-shell__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .tw-auth-shell {
+    padding: 28px 12px 48px;
+  }
+
+  .tw-auth-panel__frame {
+    padding: 22px 18px;
+    border-radius: 18px;
+  }
+
+  .tw-auth-title {
+    font-size: 26px;
+  }
+
+  .tw-account-home {
+    padding: 28px 12px 48px;
+  }
+
+  .tw-account-home__title {
+    font-size: 42px;
+  }
+
+  .tw-calendar-shell,
+  .tw-account-panel,
+  .tw-account-home__status-card {
+    border-radius: 20px;
+  }
+
+  .tw-calendar-shell {
+    padding: 18px;
+  }
+
+  .tw-calendar-grid {
+    gap: 8px;
+  }
+
+  .tw-calendar-day {
+    min-height: 92px;
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .tw-calendar-day__number {
+    font-size: 19px;
+  }
+
+  .tw-account-panel {
+    padding: 18px;
+  }
+
+  .tw-account-panel__title {
+    font-size: 22px;
+  }
 }

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In | Tokyo Weekend</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../CSS/style.css" />
+</head>
+<body class="bg-stone-100 text-gray-900" data-page="auth">
+  <div id="header"></div>
+
+  <main class="tw-auth-shell" data-auth-shell data-auth-mode="signin">
+    <section class="tw-auth-stage">
+      <div class="tw-auth-panel__frame">
+        <div class="tw-auth-panel__topline">
+          <span class="tw-auth-panel__eyebrow" data-i18n="auth.panelEyebrow">Account</span>
+          <h1 class="tw-auth-title" data-i18n="auth.title">Make your Tokyo weekend feel a little more personal.</h1>
+          <p class="tw-auth-panel__helper" data-auth-helper data-i18n="auth.signinHelper">
+            Sign in with the account you already created.
+          </p>
+        </div>
+
+        <div class="tw-auth-mode-switch" role="tablist" aria-label="Authentication mode">
+          <button type="button" class="tw-auth-mode-switch__button is-active" data-auth-mode-button="signin" aria-pressed="true">
+            <span data-i18n="auth.signInTab">Sign in</span>
+          </button>
+          <button type="button" class="tw-auth-mode-switch__button" data-auth-mode-button="signup" aria-pressed="false">
+            <span data-i18n="auth.createAccountTab">Create account</span>
+          </button>
+        </div>
+
+        <div id="auth-setup-notice" class="tw-auth-setup" hidden>
+          <h2 data-i18n="auth.setupTitle">Firebase configuration needed</h2>
+          <p data-i18n="auth.setupBody">
+            Add your Firebase web app config to Js/firebase-config.js, then enable Email/Password and Google in the Firebase console.
+          </p>
+        </div>
+
+        <form id="auth-form" class="tw-auth-form" novalidate>
+          <label class="tw-auth-field" data-auth-name-field hidden>
+            <span data-i18n="auth.nameLabel">Display name</span>
+            <input type="text" name="name" autocomplete="name" data-i18n-placeholder="auth.namePlaceholder" placeholder="Your name" />
+          </label>
+
+          <label class="tw-auth-field">
+            <span data-i18n="auth.emailLabel">Email</span>
+            <input type="email" name="email" autocomplete="email" data-i18n-placeholder="auth.emailPlaceholder" placeholder="you@example.com" />
+          </label>
+
+          <label class="tw-auth-field">
+            <span data-i18n="auth.passwordLabel">Password</span>
+            <input type="password" name="password" autocomplete="current-password" data-i18n-placeholder="auth.passwordPlaceholder" placeholder="Minimum 6 characters" />
+          </label>
+
+          <label class="tw-auth-field" data-auth-confirm-field hidden>
+            <span data-i18n="auth.confirmPasswordLabel">Confirm password</span>
+            <input type="password" name="confirmPassword" autocomplete="new-password" data-i18n-placeholder="auth.confirmPasswordPlaceholder" placeholder="Repeat your password" />
+          </label>
+
+          <button type="submit" class="tw-auth-submit" data-auth-submit>
+            <span data-auth-submit-label data-i18n="auth.signInAction">Sign in</span>
+          </button>
+
+          <div class="tw-auth-divider">
+            <span data-i18n="auth.orContinueWith">Or continue with</span>
+          </div>
+
+          <button type="button" class="tw-auth-provider" data-auth-provider="google">
+            <span class="tw-auth-provider__mark" aria-hidden="true">G</span>
+            <span data-i18n="auth.googleAction">Continue with Google</span>
+          </button>
+        </form>
+
+        <div id="auth-signed-in" class="tw-auth-success" hidden>
+          <p class="tw-auth-success__eyebrow" data-i18n="auth.signedInEyebrow">Signed in</p>
+          <h2 id="auth-user-name" class="tw-auth-success__name">Tokyo Weekend</h2>
+          <p id="auth-user-email" class="tw-auth-success__email"></p>
+          <div class="tw-auth-success__actions">
+            <a id="auth-continue-link" class="tw-auth-submit" href="/index.html" data-i18n="auth.continueAction">Continue</a>
+            <button id="auth-page-signout" type="button" class="tw-auth-provider tw-auth-provider--secondary" data-i18n="common.signOut">
+              Sign out
+            </button>
+          </div>
+        </div>
+
+        <p id="auth-status" class="tw-auth-status" hidden></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="../Js/main.js"></script>
+  <script type="module">
+    import { bootstrapPage } from "../Js/firebase-auth.js";
+    await bootstrapPage("auth");
+  </script>
+</body>
+</html>

@@ -9,6 +9,8 @@ const UI_STRINGS = {
       exhibitionsTitle: "Tokyo Exhibitions",
       nightlifeTitle: "Tokyo Nightlife",
       activitiesTitle: "Tokyo Activities",
+      authTitle: "Sign In | Tokyo Weekend",
+      accountTitle: "My Calendar | Tokyo Weekend",
       eventSuffix: "Tokyo Weekend"
     },
     nav: {
@@ -22,6 +24,10 @@ const UI_STRINGS = {
       openMenu: "Open menu",
       closeMenu: "Close menu",
       languageSwitcher: "Language",
+      signIn: "Sign in",
+      createAccount: "Create account",
+      account: "Account",
+      signOut: "Sign out",
       follow: "Follow",
       about: "About",
       contact: "Contact",
@@ -46,6 +52,86 @@ const UI_STRINGS = {
       heroSubtitle: "Find film screenings, exhibitions, nightlife and useful event picks in Tokyo.",
       searchPlaceholder: "Search events...",
       topPicksTitle: "Top Picks This Weekend"
+    },
+    auth: {
+      kicker: "Member access",
+      title: "Make your Tokyo weekend feel a little more personal.",
+      subtitle: "Use email or Google to create a secure account that carries across visits.",
+      benefitOneTitle: "Fast return access",
+      benefitOneBody: "Come back without repeating the same setup every time you browse plans.",
+      benefitTwoTitle: "Google in one step",
+      benefitTwoBody: "Use your Google account when you want the quickest path in.",
+      benefitThreeTitle: "Ready for member features",
+      benefitThreeBody: "Your account foundation is ready for future saved picks and personalized tools.",
+      panelEyebrow: "Account",
+      signInTab: "Sign in",
+      createAccountTab: "Create account",
+      signinHelper: "Sign in with the account you already created.",
+      signupHelper: "Use email and password to create a secure account.",
+      setupTitle: "Firebase configuration needed",
+      setupBody: "Add your Firebase web app config to Js/firebase-config.js, then enable Email/Password and Google in the Firebase console.",
+      nameLabel: "Display name",
+      namePlaceholder: "Your name",
+      emailLabel: "Email",
+      emailPlaceholder: "you@example.com",
+      passwordLabel: "Password",
+      passwordPlaceholder: "Minimum 6 characters",
+      confirmPasswordLabel: "Confirm password",
+      confirmPasswordPlaceholder: "Repeat your password",
+      signInAction: "Sign in",
+      createAccountAction: "Create account",
+      orContinueWith: "Or continue with",
+      googleAction: "Continue with Google",
+      processing: "Processing...",
+      signedInEyebrow: "Signed in",
+      continueAction: "Continue",
+      invalidCredentials: "The email or password was not accepted.",
+      emailInUse: "That email is already registered.",
+      weakPassword: "Use at least 6 characters for your password.",
+      popupClosed: "The Google sign-in window was closed before finishing.",
+      popupBlocked: "Your browser blocked the Google sign-in popup.",
+      accountExistsDifferentProvider: "That email already exists with a different sign-in method.",
+      tooManyRequests: "Too many attempts. Please wait a moment and try again.",
+      genericError: "Something went wrong. Please try again.",
+      mobileKicker: "Member access",
+      mobileCopy: "Create an account or sign in to continue with secure access.",
+      manageAccount: "Manage account",
+      fillRequired: "Please fill in your email and password.",
+      nameRequired: "Add a display name to finish creating your account.",
+      passwordMismatch: "Your password confirmation does not match.",
+      accountCreated: "Your account is ready.",
+      signedIn: "You are signed in.",
+      googleSuccess: "Google sign-in completed.",
+      signedOut: "You have signed out.",
+      setupMessage: "Firebase Auth is wired in, but the project configuration in Js/firebase-config.js still needs your real Firebase web app values."
+    },
+    accountHome: {
+      eyebrow: "Personal planner",
+      title: "My Weekend Calendar",
+      subtitle: "Use this calendar as your home base for planning. Later, you'll be able to attach Tokyo Weekend activities directly to each day.",
+      monthLabel: "Calendar",
+      todayAction: "Today",
+      selectedDayTitle: "Selected day",
+      linkedActivitiesTitle: "Linked activities",
+      linkingReady: "Activity linking ready",
+      linkingReadyBody: "This page is prepared for attaching saved events, screenings, and exhibitions to specific dates later on.",
+      guestTitle: "Sign in for personal planning",
+      guestBody: "Your calendar is visible now, but sign in before you start saving activity links and notes.",
+      signInAction: "Sign in to continue",
+      noActivities: "No linked activities yet.",
+      noActivitiesBody: "Once activity linking is enabled, your saved Tokyo Weekend picks will appear here for the selected day.",
+      placeholderBadge: "Coming soon",
+      ideasTitle: "What this page will support later",
+      ideasOne: "Attach screenings, exhibitions, nightlife plans, and activities to exact dates.",
+      ideasTwo: "Keep a clear day-by-day view of what is confirmed and what is still just an idea.",
+      ideasThree: "Use the side panel for notes, saved combinations, and quick planning context.",
+      scheduleTitle: "Daily structure",
+      scheduleMorning: "Morning",
+      scheduleAfternoon: "Afternoon",
+      scheduleEvening: "Evening",
+      scheduleEmpty: "No plan yet",
+      markerSingle: "1 plan",
+      markerPlural: "{count} plans"
     },
     event: {
       highlights: "Highlights",
@@ -603,6 +689,10 @@ function applyPageLocalization() {
     document.title = t("meta.nightlifeTitle");
   } else if (page === "activities") {
     document.title = t("meta.activitiesTitle");
+  } else if (page === "auth") {
+    document.title = t("meta.authTitle");
+  } else if (page === "account") {
+    document.title = t("meta.accountTitle");
   }
 
   const highlightsTitle = document.querySelector("[data-event-heading='highlights']");
@@ -645,6 +735,7 @@ function initLanguageSwitcher() {
       applyStaticTranslations();
       syncLanguageButtons();
       await rerenderCurrentView();
+      document.dispatchEvent(new CustomEvent("tw:language-changed", { detail: { language: nextLanguage } }));
     });
   });
 }
@@ -912,6 +1003,9 @@ async function loadHeader() {
     initLanguageSwitcher();
     applyStaticTranslations(headerEl || document);
     syncLanguageButtons();
+    if (window.TWAuth && typeof window.TWAuth.renderHeaderAuth === "function") {
+      await window.TWAuth.renderHeaderAuth();
+    }
   } catch (error) {
     console.error(error);
   }
@@ -974,6 +1068,14 @@ async function rerenderCurrentView() {
     return;
   }
 
+  if (page === "auth") {
+    return;
+  }
+
+  if (page === "account") {
+    return;
+  }
+
   await renderCards(page);
 }
 
@@ -985,3 +1087,6 @@ async function initializePage(pageName) {
   await loadHeader();
   await rerenderCurrentView();
 }
+
+window.t = t;
+window.initializePage = initializePage;
