@@ -1,4 +1,4 @@
-import json
+﻿import json
 import re
 import math
 import os
@@ -144,12 +144,12 @@ INPUT:
 - Official Event Text:
 {raw_description}
 
-STEP 1 — UNDERSTAND (do internally, do NOT output):
+STEP 1 鈥?UNDERSTAND (do internally, do NOT output):
 - What is the most distinctive element?
   (e.g. scale, material, method, curatorial structure, artist approach)
 - What is NOT generic about this event?
 
-STEP 2 — WRITE:
+STEP 2 鈥?WRITE:
 
 1. summary
 - one sentence
@@ -448,7 +448,7 @@ def build_extra_prompt_context(item) -> str:
         stop_patterns = [
             r"SPECIAL\s+GUEST(?:\s+DJ)?\s*:",
             r"GUEST\s+DJ\s*:",
-            r"DJ(?:'S|鈥橲|閳ユ獨)?(?:\s*\(A\s*TO\s*Z\))?\s*:",
+            r"DJ(?:'S)?(?:\s*\(A\s*TO\s*Z\))?\s*:",
             r"LIVE\s*:",
             r"PHOTO\s*:",
             r"FOOD\s*:",
@@ -457,7 +457,7 @@ def build_extra_prompt_context(item) -> str:
         ]
         extracted = {
             "Guest DJ": extract_nightlife_segment(raw, [r"GUEST\s+DJ", r"SPECIAL\s+GUEST(?:\s+DJ)?"], stop_patterns),
-            "DJ lineup": extract_nightlife_segment(raw, [r"DJ(?:'S|鈥橲|閳ユ獨)?(?:\s*\(A\s*TO\s*Z\))?"], stop_patterns),
+            "DJ lineup": extract_nightlife_segment(raw, [r"DJ(?:'S)?(?:\s*\(A\s*TO\s*Z\))?"], stop_patterns),
             "Live": extract_nightlife_segment(raw, [r"LIVE"], stop_patterns),
             "Organizer": extract_nightlife_segment(raw, [r"ORGANIZER"], stop_patterns),
         }
@@ -630,6 +630,33 @@ def save_generation_cache(cache_entries):
     }
     with open(CACHE_PATH, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
+
+
+def should_reuse_cached_entry(cached: dict) -> bool:
+    if not isinstance(cached, dict):
+        return False
+
+    if not cached.get("publishable", False):
+        return False
+
+    if cached.get("needsReview", False):
+        return False
+
+    reasons = cached.get("qualityReasons", [])
+    if not isinstance(reasons, list):
+        return False
+
+    blocked_reasons = {
+        "too_few_highlights",
+        "weak_description_structure",
+        "not_distinct_enough",
+        "unsupported_detail",
+        "risky_output",
+    }
+    if any(reason in blocked_reasons for reason in reasons):
+        return False
+
+    return True
 
 
 def validate_event(item):
@@ -1000,8 +1027,8 @@ def build_nightlife_highlights(item) -> list[str]:
     lower = raw.lower()
     title = sanitize_text(item.get("title", "This event"))
 
-    guest_dj = extract_after_label(raw, ["Guest DJ :", "SPECIAL GUEST:", "SPECIAL GUEST DJ:"], ["DJ", "DJ’s", "LIVE", "PHOTO", "FOOD", "Organizer"])
-    djs = extract_after_label(raw, ["DJ :", "DJ:", "DJ’s (A to Z) :", "DJ'S (A TO Z) :"], ["LIVE", "PHOTO", "FOOD", "Organizer", "SPECIAL GUEST"])
+    guest_dj = extract_after_label(raw, ["Guest DJ :", "SPECIAL GUEST:", "SPECIAL GUEST DJ:"], ["DJ", "DJ's", "LIVE", "PHOTO", "FOOD", "Organizer"])
+    djs = extract_after_label(raw, ["DJ :", "DJ:", "DJ's (A to Z) :", "DJ'S (A TO Z) :"], ["LIVE", "PHOTO", "FOOD", "Organizer", "SPECIAL GUEST"])
     live = extract_after_label(raw, ["LIVE :", "LIVE:"], ["PHOTO", "FOOD", "Organizer"])
     organizer = extract_after_label(raw, ["Organizer :", "ORGANIZER :"], ["DJ", "LIVE", "PHOTO", "FOOD"])
 
@@ -1012,7 +1039,7 @@ def build_nightlife_highlights(item) -> list[str]:
     if guest_names:
         highlights.append(f"Guest names like {', '.join(guest_names)} give the night a sharper draw than a house-party-style weekly")
     if dj_names:
-        highlights.append(f"The DJ roster centers on {', '.join(dj_names[:3])}, which helps define the room’s actual character")
+        highlights.append(f"The DJ roster centers on {', '.join(dj_names[:3])}, which helps define the room's actual character")
     if live_names:
         highlights.append(f"Live appearances from {', '.join(live_names)} make this feel more mixed-format than a straight DJ session")
     if "tour final" in lower or "japan tour" in lower:
@@ -1020,7 +1047,7 @@ def build_nightlife_highlights(item) -> list[str]:
     if organizer:
         highlights.append(f"Programming by {organizer} suggests a curatorial hand behind the night, not just a loose lineup dump")
     if "azumaya" in title.lower():
-        highlights.append("Azumaya’s small-room reputation usually makes lineup details matter more because the crowd stays close to the booth")
+        highlights.append("Azumaya's small-room reputation usually makes lineup details matter more because the crowd stays close to the booth")
 
     return highlights
 
@@ -1047,7 +1074,7 @@ def build_activity_highlights(item) -> list[str]:
     if "333 carp streamers" in title_lower or "koinobori" in title_lower:
         highlights.append("The giant streamer display makes this event legible at a glance, which is exactly why it works as a city-season marker")
     if "award of excellence" in lower:
-        highlights.append("The site’s horticultural reputation gives the visit more substance than a simple flower-photo destination")
+        highlights.append("The site's horticultural reputation gives the visit more substance than a simple flower-photo destination")
     if "100th anniversary" in lower:
         highlights.append("An anniversary context adds institutional weight rather than leaving the event as a loose seasonal listing")
 
@@ -1125,19 +1152,19 @@ def fallback_description(item) -> list[str]:
 
     if "scale" in raw and "sculpture" in raw:
         return [
-            "Ron Mueck’s figurative sculptures use shifts in scale to unsettle how the body is seen and understood.",
+            "Ron Mueck's figurative sculptures use shifts in scale to unsettle how the body is seen and understood.",
             "Their realism and ambiguity create a viewing experience that feels immediate, strange, and intensely focused."
         ]
 
     if "every three years" in raw or "twenty-one artists" in raw:
         return [
-            "This edition of Roppongi Crossing brings together 21 artists and collectives as a wide-angle view of Japan’s contemporary art scene.",
+            "This edition of Roppongi Crossing brings together 21 artists and collectives as a wide-angle view of Japan's contemporary art scene.",
             "With time as its central framework, the exhibition expands across multiple forms, from painting and video to crafts and community-based practice."
         ]
 
     if "archival research" in raw and "personal interviews" in raw:
         return [
-            "Hao Jingban’s video works draw on archival research, personal interviews, and performance to connect lived experience with historical record.",
+            "Hao Jingban's video works draw on archival research, personal interviews, and performance to connect lived experience with historical record.",
             "The exhibition traces how individual stories and larger historical forces continue to echo into the present."
         ]
 
@@ -1212,7 +1239,7 @@ def fallback_highlights(item) -> list[str]:
         highlights.append("Part of a major international touring exhibition")
 
     if "every three years" in raw or "staged every three years" in raw:
-        highlights.append("Triennial survey of Japan’s contemporary art scene")
+        highlights.append("Triennial survey of Japan's contemporary art scene")
     if "twenty-one artists" in raw or "artist groups" in raw:
         highlights.append("Brings together 21 artists and collectives")
     if "guest curators" in raw:
@@ -1223,7 +1250,7 @@ def fallback_highlights(item) -> list[str]:
         highlights.append("Extends beyond painting and sculpture")
 
     if "archival research" in raw:
-        highlights.append("Archival research shapes the work’s structure")
+        highlights.append("Archival research shapes the work's structure")
     if "personal interviews" in raw:
         highlights.append("Personal interviews intersect with historical material")
     if "performance" in raw:
@@ -1288,7 +1315,7 @@ def clean_highlights(highlights):
         "august", "september", "october",
         "november", "december", "january",
         "february", "march",
-        "museum", "station", "roppongi", "tokyo",
+        "station",
         "presented at", "on view",
     ]
 
@@ -1337,227 +1364,6 @@ def clean_highlights(highlights):
     return deduped[:5]
 
 
-def build_exhibition_highlights(item) -> list[str]:
-    highlights = []
-    raw = raw_description_text(item)
-    lower = raw.lower()
-    title = sanitize_text(item.get("title", "This exhibition"))
-
-    if "video" in lower and "installation" in lower:
-        highlights.append("Video and installation work are both central here, so the show reads as spatial as well as image-based")
-    elif "video" in lower:
-        highlights.append("Moving-image work is central, which changes the pacing from object viewing to time-based attention")
-    if "photography" in lower:
-        highlights.append("Photography is treated as part of the argument, not just supporting material around the main works")
-    if "archival" in lower or "archive" in lower:
-        highlights.append("Archival material is used as active evidence, giving the exhibition a stronger research backbone")
-    if "fiction and documentary" in lower:
-        highlights.append("The tension between fiction and documentary is explicit, which keeps the work from settling into one register")
-    if "diaspora" in lower or "diasporic" in lower:
-        highlights.append("Diaspora is treated as a lived historical condition, not just an abstract identity theme")
-    if "korean diaspora" in lower or "south korea" in lower:
-        highlights.append("The Korean diaspora focus gives the research a concrete geopolitical frame instead of a vague transnational one")
-    if "migration" in lower or "immigrated" in lower or "foreign lands" in lower:
-        highlights.append("Migration is approached through personal memory and movement across borders rather than through policy language alone")
-    if "three artists" in lower:
-        highlights.append("The three-artist structure keeps the argument comparative, letting different diasporic trajectories sharpen each other")
-    if "colonial" in lower or "dictatorship" in lower:
-        highlights.append("Colonial history is addressed directly rather than left as distant context behind the work")
-    if "borders" in lower or "border" in lower:
-        highlights.append("Border-crossing memory is central here, which gives the exhibition a sharper historical and emotional throughline")
-    if "climate crisis" in lower or "carbon capture" in lower:
-        highlights.append("Climate politics are framed through specific materials and systems instead of broad environmental messaging")
-    if any(word in lower for word in ["oil", "tobacco", "sugar", "cotton"]):
-        highlights.append("Commodity histories are named directly, which makes the political frame feel materially grounded rather than symbolic")
-    if "performance" in lower:
-        highlights.append("Performance language shapes the work, which usually makes the exhibition feel more charged than static display")
-    if "new works" in lower or "japan premiere" in lower:
-        highlights.append(f"{title} includes newly presented material, so it is not just a repeat of already-circulating work")
-
-    return highlights
-
-
-def build_nightlife_highlights(item) -> list[str]:
-    highlights = []
-    raw = raw_description_text(item)
-    lower = raw.lower()
-    title = sanitize_text(item.get("title", "This event"))
-
-    stop_patterns = [
-        r"SPECIAL\s+GUEST(?:\s+DJ)?\s*:",
-        r"GUEST\s+DJ\s*:",
-        r"DJ(?:'S|’S|鈥檚)?(?:\s*\(A\s*TO\s*Z\))?\s*:",
-        r"LIVE\s*:",
-        r"PHOTO\s*:",
-        r"FOOD\s*:",
-        r"ORGANIZER\s*:",
-        r"\[[^\]]+\]\s+\w+\s+DJ\s*:",
-    ]
-    guest_dj = extract_nightlife_segment(raw, [r"GUEST\s+DJ", r"SPECIAL\s+GUEST(?:\s+DJ)?"], stop_patterns)
-    djs = extract_nightlife_segment(raw, [r"DJ(?:'S|’S|鈥檚)?(?:\s*\(A\s*TO\s*Z\))?"], stop_patterns)
-    live = extract_nightlife_segment(raw, [r"LIVE"], stop_patterns)
-    organizer = extract_nightlife_segment(raw, [r"ORGANIZER"], stop_patterns)
-
-    if not looks_like_clean_lineup_segment(guest_dj, 8):
-        guest_dj = ""
-    if not looks_like_clean_lineup_segment(djs, 18):
-        djs = ""
-    if not looks_like_clean_lineup_segment(live, 10):
-        live = ""
-    if not looks_like_clean_lineup_segment(organizer, 5):
-        organizer = ""
-
-    guest_names = split_people(guest_dj, 2)
-    dj_names = split_people(djs, 4)
-    live_names = split_people(live, 2)
-
-    if guest_names:
-        highlights.append(f"Guest names like {', '.join(guest_names)} give the night a sharper draw than a house-party-style weekly")
-    if dj_names:
-        highlights.append(f"The core DJ roster around {', '.join(dj_names[:3])} gives the night a more legible musical identity")
-    if live_names:
-        highlights.append(f"Live appearances from {', '.join(live_names)} make this feel more mixed-format than a straight DJ session")
-    if "tour final" in lower or "japan tour" in lower:
-        highlights.append("A tour stop or final-date framing raises the sense that this is a one-off booking rather than routine programming")
-    if organizer:
-        highlights.append(f"Programming by {organizer} suggests a curatorial hand behind the night, not just a loose lineup dump")
-    genre_hits = []
-    for genre in ["afro", "house", "techno", "bass", "hip hop", "reggae"]:
-        if genre in lower and genre not in genre_hits:
-            genre_hits.append(genre)
-    if genre_hits:
-        highlights.append(f"Genre cues like {', '.join(genre_hits[:2])} make the floor direction easier to picture before you even arrive")
-    if "azumaya" in title.lower():
-        highlights.append("Azumaya’s small-room reputation usually makes lineup details matter more because the crowd stays close to the booth")
-
-    return highlights
-
-
-def build_activity_highlights(item) -> list[str]:
-    highlights = []
-    title = sanitize_text(item.get("title", "This event"))
-    raw = raw_description_text(item)
-    lower = raw.lower()
-    title_lower = title.lower()
-
-    if "rose" in title_lower or "rose" in lower:
-        highlights.append("The rose focus gives the event a very specific seasonal look rather than a generic spring outing")
-    if "grand festival" in title_lower:
-        highlights.append("A grand-festival framing usually means formal processions, shrine ritual, and stage programs rather than a simple fairground feel")
-    if "shrine" in title_lower or "jingu" in title_lower:
-        highlights.append("The shrine setting matters here because ritual atmosphere is part of the experience, not just the backdrop")
-    if "garden" in title_lower or "botanical" in lower:
-        highlights.append("This works best as a landscape-and-season event, where the setting does as much work as the program")
-    if "azalea" in title_lower or "azaleas" in title_lower:
-        highlights.append("The azalea focus makes the garden read in broad color fields, which is different from single-specimen flower viewing")
-    if "peony" in title_lower or "peonies" in title_lower:
-        highlights.append("The peony angle matters because it gives the visit a dense, ornamental spring focus rather than a broad flower mix")
-    if "sakura" in title_lower or "blossom" in title_lower:
-        highlights.append("Cherry-blossom framing makes timing unusually important here, since the appeal depends on catching a short-lived peak")
-    if "archery" in title_lower or "yabusame" in title_lower:
-        highlights.append("Mounted archery gives the event a strong visual identity that is hard to confuse with a standard local festival")
-    if "regatta" in title_lower or "boat race" in title_lower:
-        highlights.append("A regatta format changes the energy from passive sightseeing to spectatorship built around motion and rivalry")
-    if "sumo" in title_lower:
-        highlights.append("The baby-sumo format makes this memorable because the spectacle is inseparable from the ritual framing")
-    if "oktoberfest" in title_lower:
-        highlights.append("The beer-hall format gives this more social energy than a passive sightseeing stop")
-    if "earth day" in title_lower:
-        highlights.append("Earth Day framing usually brings workshops and public participation, which makes the event more active than a standard fair")
-    if "street stage" in title_lower:
-        highlights.append("A street-stage setup keeps the event open and kinetic, with performance acting as the main draw rather than background entertainment")
-    if "darkness festival" in title_lower:
-        highlights.append("The darkness-festival identity already carries a dramatic mood, so the appeal is closer to spectacle and ritual than daytime browsing")
-    if "333 carp streamers" in title_lower or "koinobori" in title_lower:
-        highlights.append("The giant streamer display makes this event legible at a glance, which is exactly why it works as a city-season marker")
-    if "award of excellence" in lower:
-        highlights.append("The site’s horticultural reputation gives the visit more substance than a simple flower-photo destination")
-    if "100th anniversary" in lower:
-        highlights.append("An anniversary context adds institutional weight rather than leaving the event as a loose seasonal listing")
-
-    return highlights
-
-
-def fallback_highlights(item) -> list[str]:
-    category = normalize_category(item.get("category"))
-    title = sanitize_text(item.get("title", "This event"))
-    venue = sanitize_text(item.get("venue", "the venue"))
-    area = sanitize_text(item.get("area", "Tokyo"))
-    date_text = sanitize_text(item.get("date", ""))
-    price = sanitize_text(item.get("price", ""))
-    raw = raw_description_text(item).lower()
-
-    if category == "Film":
-        highlights = build_film_highlights(item)
-        fallback_pool = [
-            f"{title} needs a concrete reason to watch beyond simple release-week visibility.",
-            "The recommendation should stand on the director, cast, or premise rather than generic availability.",
-            "A strong movie pick still needs a clear hook even before you look at showtimes.",
-            "If the film has no distinct angle, it should not read like a strong recommendation."
-        ]
-    elif category == "Nightlife":
-        highlights = build_nightlife_highlights(item)
-        fallback_pool = [
-            f"{title} only becomes compelling once the actual DJs, guests, or room identity are made concrete.",
-            f"A useful nightlife recommendation in {area} should tell you who is shaping the floor and why.",
-            "The more specific the lineup details are, the easier it is to picture the night’s real atmosphere.",
-            "If a nightlife highlight could fit any club, it is not strong enough."
-        ]
-    elif category == "Activity":
-        highlights = build_activity_highlights(item)
-        fallback_pool = [
-            f"{title} should only survive if it has one memorable trait people can repeat back in a sentence.",
-            f"A strong activity listing around {area} needs a specific ritual, seasonal feature, or public format that stands out.",
-            "The interesting part should come from what actually happens there, not just from where it is.",
-            "If the same highlight could fit ten other outings, it is too weak."
-        ]
-    else:
-        highlights = build_exhibition_highlights(item)
-        fallback_pool = [
-            f"{title} is only worth recommending if the medium, subject, or research method is doing something specific.",
-            f"The framing at {venue} matters because this appears built around a clear argument rather than a loose survey.",
-            "A strong exhibition highlight should tell you what kind of work is actually carrying the show.",
-            "If the exhibition has no concrete material or thematic hook, it should not survive as a featured listing."
-        ]
-
-    deduped = []
-    for line in highlights:
-        line = sanitize_text(line)
-        if line and line not in deduped:
-            deduped.append(line)
-
-    if deduped:
-        return deduped[:4]
-
-    if category == "Nightlife":
-        if venue:
-            deduped.append(f"At {venue}, this reads more like a room-led club pick than a big headline-driven booking.")
-        if re.search(r"\b(21|22|23):\d{2}\b", date_text):
-            deduped.append("The late start points to a full-night floor session, so it suits people choosing one room and settling in.")
-        elif price and ("before 23:00" in price.lower() or "u-23" in price.lower()):
-            deduped.append("Early-entry and U-23 pricing suggest a local regulars' night rather than a one-off spectacle booking.")
-        if price and ("before 23:00" in price.lower() or "u-23" in price.lower()):
-            deduped.append("The entry structure rewards arriving early, which usually means the night is built to develop over hours rather than peak instantly.")
-    elif category == "Exhibition":
-        lower_title = title.lower()
-        if "quantum" in lower_title or "space" in lower_title:
-            deduped.append("The science-art framing gives the exhibition a clearer conceptual angle than a broad contemporary group show.")
-        if "mission" in lower_title or "art" in lower_title:
-            deduped.append("Its appeal depends on how artistic expression is pushed toward research territory rather than staying in a purely visual register.")
-        if not deduped and venue:
-            deduped.append(f"The project at {venue} reads more like a framed proposition than a loose survey, which helps it stand out.")
-    elif category == "Activity":
-        if venue and area:
-            deduped.append(f"The event's appeal is tied to its specific setting around {area}, not just to a generic seasonal label.")
-        elif venue:
-            deduped.append(f"The setting at {venue} is doing real work here, so this is more place-specific than a generic city listing.")
-    elif category == "Film":
-        if title:
-            deduped.append(f"{title} still needs a concrete hook from its premise, cast, or director to justify the recommendation.")
-        if date_text:
-            deduped.append("The main value here is that it is a current theatrical option in Tokyo rather than a catalog title to save for later.")
-
-    return deduped[:2]
 
 
 def contains_invented_detail(text: str) -> bool:
@@ -1695,7 +1501,7 @@ def generate_ai_content(client: OpenAI, item):
         debug_bad_item(item, prompt)
         print("API ERROR:", repr(e))
 
-        # 二次兜底：把 prompt 截断后再试一次
+        # 浜屾鍏滃簳锛氭妸 prompt 鎴柇鍚庡啀璇曚竴娆?
         try:
             short_prompt = sanitize_text(prompt[:12000])
             short_messages = [
@@ -2014,7 +1820,7 @@ def main():
                 )
                 fingerprint = build_generation_fingerprint(item)
                 cached = cache_entries.get(fingerprint)
-                if cached:
+                if should_reuse_cached_entry(cached):
                     enriched = normalize_final_event(cached)
                     print(f"[CACHE] Reusing generated copy for: {item.get('title', 'Unknown')}")
                 else:
