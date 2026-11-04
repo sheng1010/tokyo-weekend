@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Calendar | Tokyo Weekend</title>
+  <meta name="description" content="Preview calendar for Tokyo Weekend. Plans are not saved." />
+  <meta name="robots" content="noindex" />
+  <meta property="og:site_name" content="Tokyo Weekend" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="My Calendar | Tokyo Weekend" />
+  <meta property="og:description" content="Preview calendar for Tokyo Weekend. Plans are not saved." />
+  <meta property="og:url" content="https://tokyo-weekend.vercel.app/pages/account.html" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../CSS/style.css" />
 </head>
@@ -17,7 +24,7 @@
         <div>
           <h1 class="tw-account-home__title" data-i18n="accountHome.title">My Weekend Calendar</h1>
           <p class="tw-account-home__subtitle" data-i18n="accountHome.subtitle">
-            Use this calendar as your home base for planning. Later, you'll be able to attach Tokyo Weekend activities directly to each day.
+            Preview only. This calendar does not save plans, and it does not show sample events.
           </p>
         </div>
 
@@ -27,6 +34,9 @@
 
     <section class="tw-account-layout">
       <div class="tw-calendar-shell">
+        <p class="tw-preview-banner" data-i18n="accountHome.previewBanner">
+          Preview only. Nothing on this calendar is saved, and the old sample dates have been removed.
+        </p>
         <div class="tw-calendar-shell__header">
           <div>
             <p class="tw-calendar-shell__eyebrow" data-i18n="accountHome.monthLabel">Calendar</p>

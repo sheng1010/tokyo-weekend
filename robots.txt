@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tokyo-weekend.vercel.app/sitemap.xml

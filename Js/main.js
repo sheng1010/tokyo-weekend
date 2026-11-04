@@ -11,6 +11,9 @@ const UI_STRINGS = {
       activitiesTitle: "Tokyo Activities",
       authTitle: "Sign In | Tokyo Weekend",
       accountTitle: "My Calendar | Tokyo Weekend",
+      allTitle: "All listings | Tokyo Weekend",
+      aboutTitle: "About | Tokyo Weekend",
+      contactTitle: "Contact | Tokyo Weekend",
       eventSuffix: "Tokyo Weekend"
     },
     nav: {
@@ -33,6 +36,12 @@ const UI_STRINGS = {
       contact: "Contact",
       footer: "Tokyo Weekend Guide © 2026",
       viewAll: "View all",
+      thisWeekend: "This weekend",
+      datesNotListed: "Dates not listed",
+      filmDatesUnconfirmed: "Screening dates were not provided, so this title is not listed as now showing.",
+      eventEndedOn: "This event ended on {date}.",
+      noWeekendEvents: "No confirmed events this weekend.",
+      noConfirmedFilms: "No films with a confirmed screening date. Titles that only say “now showing” are hidden.",
       viewDetails: "View details ->",
       visitSource: "Visit source ->",
       noEvents: "No events found.",
@@ -51,7 +60,27 @@ const UI_STRINGS = {
       heroTitle: "What to Do in Tokyo This Weekend",
       heroSubtitle: "Find film screenings, exhibitions, nightlife and useful event picks in Tokyo.",
       searchPlaceholder: "Search events...",
-      topPicksTitle: "Top Picks This Weekend"
+      topPicksTitle: "Top Picks This Weekend",
+      searchResults: "Search results"
+    },
+    filmPage: {
+      intro: "Only films with a confirmed screening end date are listed. A title that only says “now showing” is not treated as current."
+    },
+    all: {
+      title: "All current listings",
+      intro: "Ended events are hidden. Films without a screening end date are hidden too."
+    },
+    about: {
+      title: "About Tokyo Weekend",
+      lead: "Tokyo Weekend is a small guide to films, exhibitions, nightlife, and city activities. Listings are collected from public museum, cinema, and event pages, then shortened for the site.",
+      dates: "An event with an end date before today is hidden. A film that only says “now showing”, with no end date, is not labeled as currently showing. “This weekend” means Friday through Sunday of the current week, and only events whose dates overlap that window.",
+      sources: "Dates, venues, and ticket links come from the source pages. The short summaries are editorial text. This site does not invent visitor scores or reviews.",
+      contactLink: "Contact"
+    },
+    contact: {
+      title: "Contact",
+      lead: "For corrections, missing dates, or partnership notes, email the owner.",
+      note: "This address is the site owner’s contact email."
     },
     auth: {
       kicker: "Member access",
@@ -108,18 +137,19 @@ const UI_STRINGS = {
     accountHome: {
       eyebrow: "Personal planner",
       title: "My Weekend Calendar",
-      subtitle: "Use this calendar as your home base for planning. Later, you'll be able to attach Tokyo Weekend activities directly to each day.",
+      subtitle: "Preview only. This calendar does not save plans, and it does not show sample events.",
+      previewBanner: "Preview only. Nothing on this calendar is saved, and the old sample dates have been removed.",
       monthLabel: "Calendar",
       todayAction: "Today",
       selectedDayTitle: "Selected day",
       linkedActivitiesTitle: "Linked activities",
-      linkingReady: "Activity linking ready",
-      linkingReadyBody: "This page is prepared for attaching saved events, screenings, and exhibitions to specific dates later on.",
-      guestTitle: "Sign in for personal planning",
-      guestBody: "Your calendar is visible now, but sign in before you start saving activity links and notes.",
+      linkingReady: "Preview only",
+      linkingReadyBody: "Signing in does not save plans. Nothing on this calendar is stored.",
+      guestTitle: "Preview calendar",
+      guestBody: "You can look through the month. Saving plans is not available.",
       signInAction: "Sign in to continue",
-      noActivities: "No linked activities yet.",
-      noActivitiesBody: "Once activity linking is enabled, your saved Tokyo Weekend picks will appear here for the selected day.",
+      noActivities: "No saved plans.",
+      noActivitiesBody: "This preview does not store events on a day.",
       placeholderBadge: "Coming soon",
       ideasTitle: "What this page will support later",
       ideasOne: "Attach screenings, exhibitions, nightlife plans, and activities to exact dates.",
@@ -171,6 +201,12 @@ const UI_STRINGS = {
       contact: "お問い合わせ",
       footer: "Tokyo Weekend Guide © 2026",
       viewAll: "すべて見る",
+      thisWeekend: "今週末",
+      datesNotListed: "日付の記載なし",
+      filmDatesUnconfirmed: "上映終了日がないため、上映中としては載せていません。",
+      eventEndedOn: "このイベントは {date} に終了しました。",
+      noWeekendEvents: "今週末で日付が確認できたイベントはありません。",
+      noConfirmedFilms: "上映終了日が確認できた映画はありません。「上映中」とだけ書かれた作品は載せていません。",
       viewDetails: "詳細を見る ->",
       visitSource: "公式を見る ->",
       noEvents: "イベントが見つかりません。",
@@ -189,7 +225,27 @@ const UI_STRINGS = {
       heroTitle: "今週末、東京で何をする？",
       heroSubtitle: "映画、展覧会、ナイトライフ、週末向けのおすすめイベントをまとめて探せます。",
       searchPlaceholder: "イベントを検索...",
-      topPicksTitle: "今週末の注目イベント"
+      topPicksTitle: "今週末の注目イベント",
+      searchResults: "検索結果"
+    },
+    filmPage: {
+      intro: "上映終了日が確認できた映画だけを掲載します。「上映中」とだけ書かれた作品は、現在上映中とは扱いません。"
+    },
+    all: {
+      title: "掲載中の一覧",
+      intro: "終了日を過ぎたイベントは表示しません。上映終了日がない映画も表示しません。"
+    },
+    about: {
+      title: "Tokyo Weekend について",
+      lead: "映画、展覧会、ナイトライフ、街のイベントを、公開ページから集めて短くまとめたガイドです。",
+      dates: "終了日が今日より前のイベントは隠し、「上映中」としか書かれていない映画は上映中とは表示しません。「今週末」は今週の金曜から日曜で、その期間と日付が重なるものだけです。",
+      sources: "日付、会場、チケットリンクは出典ページのものです。短い紹介文は編集文です。来場者スコアやレビューは作っていません。",
+      contactLink: "お問い合わせ"
+    },
+    contact: {
+      title: "お問い合わせ",
+      lead: "訂正、日付の抜け、提携については所有者にメールしてください。",
+      note: "このアドレスはサイト所有者の連絡先です。"
     },
     event: {
       highlights: "見どころ",
@@ -229,6 +285,12 @@ const UI_STRINGS = {
       contact: "联系",
       footer: "Tokyo Weekend Guide © 2026",
       viewAll: "查看全部",
+      thisWeekend: "本周末",
+      datesNotListed: "未提供日期",
+      filmDatesUnconfirmed: "没有放映结束日期，因此不会标成正在上映。",
+      eventEndedOn: "这个活动已于 {date} 结束。",
+      noWeekendEvents: "本周末没有日期已确认的活动。",
+      noConfirmedFilms: "没有带确认放映日期的电影。只写着“正在上映”的条目已隐藏。",
       viewDetails: "查看详情 ->",
       visitSource: "查看来源 ->",
       noEvents: "暂无相关内容。",
@@ -247,7 +309,27 @@ const UI_STRINGS = {
       heroTitle: "这个周末在东京做什么？",
       heroSubtitle: "快速找到东京的电影、展览、夜生活和实用活动推荐。",
       searchPlaceholder: "搜索活动...",
-      topPicksTitle: "本周末精选"
+      topPicksTitle: "本周末精选",
+      searchResults: "搜索结果"
+    },
+    filmPage: {
+      intro: "只列出有确认放映结束日期的电影。只写着“正在上映”的片名不会被当成当前在映。"
+    },
+    all: {
+      title: "当前列表",
+      intro: "已结束的活动不显示。没有放映结束日期的电影也不显示。"
+    },
+    about: {
+      title: "关于 Tokyo Weekend",
+      lead: "这是一份东京电影、展览、夜生活和城市活动的小型指南。条目来自公开页面，再压缩成短介绍。",
+      dates: "结束日期早于今天的活动会被隐藏。只写着“正在上映”、没有结束日期的电影不会被标成正在上映。“本周末”指本周五到周日，并且只保留日期与这段时间重叠的活动。",
+      sources: "日期、场馆和购票链接来自原始页面。短介绍是编辑文字。本站不编造访客评分或评论。",
+      contactLink: "联系"
+    },
+    contact: {
+      title: "联系",
+      lead: "更正、缺日期或合作事宜，请发邮件给站主。",
+      note: "这个地址是站主的联系邮箱。"
     },
     event: {
       highlights: "推荐亮点",
@@ -377,7 +459,7 @@ function localizeCategory(category) {
 function localizeRuntimeText(text) {
   if (!text) return "";
   if ((text || "").trim().toLowerCase() === "now showing") {
-    return t("common.nowShowing");
+    return t("common.datesNotListed");
   }
   return text;
 }
@@ -426,7 +508,7 @@ function createSvgPlaceholder(item) {
       background: "#111827",
       accent: "#f8fafc",
       sub: "#f87171",
-      label: "NOW SHOWING"
+      label: "FILM"
     };
   } else if (category === "nightlife") {
     palette = {
@@ -470,31 +552,251 @@ function getCardMeta(item) {
   return `${(item.location || "").trim()}${item.date ? ` - ${item.date}` : ""}`;
 }
 
-function getEventDetailCopy(event) {
-  const category = getCategoryKey(event);
+function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function parseIsoDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || "").trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
+  return date;
+}
+
+function dateFromParts(year, monthIndex, day) {
+  const date = new Date(year, monthIndex, day);
+  if (date.getFullYear() !== year || date.getMonth() !== monthIndex || date.getDate() !== day) {
+    return null;
+  }
+  return date;
+}
+
+function monthIndex(name) {
+  const months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+  return months.indexOf(String(name || "").toLowerCase());
+}
+
+function parseChunk(chunk, fallbackYear) {
+  const dotted = String(chunk || "").match(/(\d{4})\.(\d{1,2})\.(\d{1,2})/);
+  if (dotted) return dateFromParts(Number(dotted[1]), Number(dotted[2]) - 1, Number(dotted[3]));
+
+  const short = String(chunk || "").match(/(?:^|[^\d])(\d{1,2})\.(\d{1,2})(?!\d)/);
+  if (short && fallbackYear) return dateFromParts(fallbackYear, Number(short[1]) - 1, Number(short[2]));
+
+  const named = String(chunk || "").match(/(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2})(?:st|nd|rd|th)?(?:,)?(?:\s*\([^)]*\))?(?:,)?\s*(\d{4})?/i);
+  if (!named) return null;
+  const year = named[3] ? Number(named[3]) : fallbackYear;
+  const month = monthIndex(named[1]);
+  if (!year || month < 0) return null;
+  return dateFromParts(year, month, Number(named[2]));
+}
+
+function parseDisplayRange(text) {
+  const raw = String(text || "").trim();
+  const lower = raw.toLowerCase();
+  if (!raw || lower === "see source" || lower === "now showing") {
+    return { start: null, end: null };
+  }
+
+  const parts = raw.split(/\s*[–—-]\s*/);
+  const years = (raw.match(/\d{4}/g) || []).map(Number);
+  const fallback = years[0] || null;
+  if (parts.length === 1) {
+    return { start: null, end: parseChunk(parts[0], fallback) };
+  }
+
+  const start = parseChunk(parts[0], fallback);
+  let end = parseChunk(parts[parts.length - 1], start ? start.getFullYear() : (years[years.length - 1] || null));
+  if (start && end && end < start && !/\d{4}/.test(parts[parts.length - 1])) {
+    end = dateFromParts(end.getFullYear() + 1, end.getMonth(), end.getDate());
+  }
+  return { start, end };
+}
+
+function effectiveRange(event) {
+  const isoStart = parseIsoDate(event?.startDate);
+  const isoEnd = parseIsoDate(event?.endDate);
+  if (isoStart || isoEnd) return { start: isoStart, end: isoEnd };
+  return parseDisplayRange(event?.date);
+}
+
+function isEnded(event, today = startOfDay(new Date())) {
+  const end = effectiveRange(event).end;
+  if (!end) return false;
+  return startOfDay(end) < today;
+}
+
+function isUndatedNowShowingFilm(event) {
+  if (getCategoryKey(event) !== "film") return false;
+  if (parseIsoDate(event?.endDate)) return false;
+  const label = String(event?.date || "").trim().toLowerCase();
+  return label === "" || label === "now showing";
+}
+
+function isListable(event) {
+  if (!hasRealImage(event)) return false;
+  if (isEnded(event)) return false;
+  if (isUndatedNowShowingFilm(event)) return false;
+  return true;
+}
+
+function thisWeekendRange(today = startOfDay(new Date())) {
+  const day = today.getDay();
+  const friday = new Date(today);
+  friday.setDate(today.getDate() + (day === 0 ? -2 : 5 - day));
+  const sunday = new Date(friday);
+  sunday.setDate(friday.getDate() + 2);
+  return { start: startOfDay(friday), end: startOfDay(sunday) };
+}
+
+function overlapsThisWeekend(event, today = startOfDay(new Date())) {
+  const range = effectiveRange(event);
+  if (!range.end) return false;
+  const start = range.start || new Date(0);
+  const weekend = thisWeekendRange(today);
+  return startOfDay(start) <= weekend.end && startOfDay(range.end) >= weekend.start;
+}
+
+function compareRank(a, b) {
+  const popularity = (Number(b.popularityScore) || 0) - (Number(a.popularityScore) || 0);
+  if (popularity) return popularity;
+  const quality = (Number(b.qualityScore) || 0) - (Number(a.qualityScore) || 0);
+  if (quality) return quality;
+  return String(a.title || "").localeCompare(String(b.title || ""));
+}
+
+function formatIsoDate(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function endedLabel(event) {
+  const end = effectiveRange(event).end;
+  return t("common.eventEndedOn", { date: formatIsoDate(end) || event.endDate || event.date || "" });
+}
+
+function availabilityMessage(event) {
+  if (isEnded(event)) {
+    return endedLabel(event);
+  }
+  if (isUndatedNowShowingFilm(event)) {
+    return t("common.filmDatesUnconfirmed");
+  }
+  return "";
+}
+
+function safeUrl(value) {
+  try {
+    const parsed = new URL(value, window.location.origin);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return parsed.href;
+    }
+  } catch (error) {
+    return "";
+  }
+  return "";
+}
+
+const listState = {
+  query: "",
+  weekendOnly: false,
+  ready: false
+};
+
+function pageDefaultsToWeekend(pageName) {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("when") === "weekend") return true;
+  if (params.get("when") === "any") return false;
+  return pageName === "home";
+}
+
+function initListState(pageName) {
+  if (listState.ready) return;
+  const params = new URLSearchParams(window.location.search);
+  listState.query = params.get("q") || "";
+  listState.weekendOnly = pageDefaultsToWeekend(pageName);
+  listState.ready = true;
+}
+
+function eventSearchText(event) {
+  const display = getDisplayEvent(event);
+  return [
+    display.title,
+    display.summary,
+    display.location,
+    display.venue,
+    display.date,
+    display.category,
+    display.categoryLabel,
+    ...safeArray(display.highlights),
+    ...safeArray(display.description)
+  ].join(" ").toLowerCase();
+}
+
+function applyListFilters(events) {
+  const query = listState.query.trim().toLowerCase();
+  return events.filter((event) => {
+    if (listState.weekendOnly && !overlapsThisWeekend(event)) return false;
+    if (!query) return true;
+    return eventSearchText(event).includes(query);
+  });
+}
+
+function emptyListingMessage(pageName) {
+  if (listState.query) return t("common.noEvents");
+  if (listState.weekendOnly) return t("common.noWeekendEvents");
+  if (pageName === "film") return t("common.noConfirmedFilms");
+  return t("common.noEvents");
+}
+
+function upsertMeta(attribute, key, content) {
+  let element = document.head.querySelector(`meta[${attribute}="${key}"]`);
+  if (!element) {
+    element = document.createElement("meta");
+    element.setAttribute(attribute, key);
+    document.head.appendChild(element);
+  }
+  element.setAttribute("content", content);
+}
+
+function getEventDetailCopy(sourceEvent) {
+  const display = getDisplayEvent(sourceEvent);
+  const category = getCategoryKey(sourceEvent);
+  const notice = availabilityMessage(sourceEvent);
 
   if (category === "film") {
+    let dateLabel = display.date || t("common.datesNotListed");
+    if (isUndatedNowShowingFilm(sourceEvent)) dateLabel = t("common.datesNotListed");
+    if (isEnded(sourceEvent)) dateLabel = endedLabel(sourceEvent);
     return {
       location: "",
       locationVisible: false,
-      date: event.date ? `${t("common.statusLabel")}: ${event.date}` : `${t("common.statusLabel")}: ${t("common.nowShowing")}`,
+      date: `${t("common.statusLabel")}: ${dateLabel}`,
       dateVisible: true,
       access: "",
-      accessVisible: safeArray(event.screeningVenues).length > 0,
+      accessVisible: safeArray(sourceEvent.screeningVenues).length > 0,
       aboutTitle: t("event.filmSynopsis"),
-      ratingVisible: false
+      availabilityMessage: notice
     };
   }
 
   return {
-    location: event.location || "",
-    locationVisible: Boolean(event.location),
-    date: event.date || "",
-    dateVisible: Boolean(event.date),
-    access: event.access || "-",
-    accessVisible: Boolean(event.access),
+    location: display.location || "",
+    locationVisible: Boolean(display.location),
+    date: isEnded(sourceEvent) ? endedLabel(sourceEvent) : (display.date || ""),
+    dateVisible: Boolean(display.date) || isEnded(sourceEvent),
+    access: display.access || "-",
+    accessVisible: Boolean(display.access),
     aboutTitle: t("event.aboutEvent"),
-    ratingVisible: true
+    availabilityMessage: notice
   };
 }
 
@@ -507,9 +809,11 @@ function renderScreeningVenueLinks(event) {
   return venues
     .map((venue) => {
       const name = escapeHtml(venue.name || "");
-      const url = escapeHtml(venue.url || "#");
-      return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-red-500 hover:underline">${name}</a>`;
+      const url = safeUrl(venue.url);
+      if (!name || !url) return "";
+      return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="text-red-500 hover:underline">${name}</a>`;
     })
+    .filter(Boolean)
     .join('<span class="text-gray-400"> / </span>');
 }
 
@@ -518,7 +822,7 @@ function getEventSlug(item) {
 }
 
 function getVisibleEvents(events) {
-  return safeArray(events).filter(hasRealImage);
+  return safeArray(events).filter(isListable);
 }
 
 function getCardMediaMarkup(item, options = {}) {
@@ -558,8 +862,8 @@ function createCard(item) {
     window.location.hostname === "localhost";
 
   const detailUrl = isLocalhost
-    ? `${basePath}event.html?slug=${itemSlug}`
-    : `${basePath}event/${itemSlug}`;
+    ? `${basePath}event.html?slug=${encodeURIComponent(itemSlug)}`
+    : `${basePath}event/${encodeURIComponent(itemSlug)}`;
 
   const mediaMarkup = getCardMediaMarkup(item, {
     extraClasses: category === "exhibition" ? " tw-card-media--exhibition" : "",
@@ -575,16 +879,16 @@ function createCard(item) {
       ${mediaMarkup}
 
       <div class="px-6 pt-5 pb-5 flex flex-col">
-          <span class="tw-category-pill" data-category="${category}">
-            ${item.categoryLabel || item.category || ""}
+          <span class="tw-category-pill" data-category="${escapeHtml(category)}">
+            ${escapeHtml(item.categoryLabel || item.category || "")}
           </span>
 
         <h3 class="mt-3 text-[18px] leading-[1.32] font-semibold text-gray-900 line-clamp-2">
-          ${item.title || ""}
+          ${escapeHtml(item.title || "")}
         </h3>
 
         <p class="mt-2 text-gray-500 text-[13px] leading-[1.5] line-clamp-2">
-          ${getCardMeta(item)}
+          ${escapeHtml(getCardMeta(item))}
         </p>
 
         <span class="mt-4 inline-flex items-center text-[14px] text-red-500 transition-all duration-200 group-hover:translate-x-1">
@@ -606,8 +910,8 @@ function createTopPickCard(item) {
     window.location.hostname === "localhost";
 
   const detailUrl = isLocalhost
-    ? `${basePath}event.html?slug=${itemSlug}`
-    : `${basePath}event/${itemSlug}`;
+    ? `${basePath}event.html?slug=${encodeURIComponent(itemSlug)}`
+    : `${basePath}event/${encodeURIComponent(itemSlug)}`;
 
   const mediaMarkup = getCardMediaMarkup(item, {
     extraClasses: ` tw-card-media--top-pick${category === "exhibition" ? " tw-card-media--exhibition" : ""}`,
@@ -621,16 +925,16 @@ function createTopPickCard(item) {
         ${mediaMarkup}
 
         <div class="p-4 flex flex-col flex-1">
-            <span class="tw-category-pill" data-category="${category}">
-              ${item.categoryLabel || item.category || ""}
+            <span class="tw-category-pill" data-category="${escapeHtml(category)}">
+              ${escapeHtml(item.categoryLabel || item.category || "")}
             </span>
 
           <h3 class="mt-3 text-[16px] leading-[1.4] font-semibold text-gray-900 min-h-[68px] line-clamp-3">
-            ${item.title || ""}
+            ${escapeHtml(item.title || "")}
           </h3>
 
           <p class="mt-3 text-gray-500 text-[13px] leading-6 min-h-[72px] line-clamp-3">
-            ${getCardMeta(item)}
+            ${escapeHtml(getCardMeta(item))}
           </p>
 
           <span class="mt-auto pt-4 inline-block text-[14px] text-red-500 transition-all duration-200 group-hover:translate-x-1">
@@ -693,24 +997,22 @@ function applyPageLocalization() {
     document.title = t("meta.authTitle");
   } else if (page === "account") {
     document.title = t("meta.accountTitle");
+  } else if (page === "all") {
+    document.title = t("meta.allTitle");
+  } else if (page === "about") {
+    document.title = t("meta.aboutTitle");
+  } else if (page === "contact") {
+    document.title = t("meta.contactTitle");
   }
 
   const highlightsTitle = document.querySelector("[data-event-heading='highlights']");
   if (highlightsTitle) highlightsTitle.textContent = t("event.highlights");
-
-  const ratingTitle = document.querySelector("[data-event-heading='rating']");
-  if (ratingTitle) ratingTitle.textContent = t("event.visitorRating");
 
   const aboutTitle = document.getElementById("event-about-title");
   if (aboutTitle && !document.getElementById("event-title")) {
     aboutTitle.textContent = t("event.aboutEvent");
   }
 
-  const outOfFive = document.querySelector("[data-i18n-static='outOfFive']");
-  if (outOfFive) outOfFive.textContent = t("common.outOfFive");
-
-  const basedOnReviews = document.getElementById("event-rating-count");
-  if (basedOnReviews) basedOnReviews.textContent = t("common.basedOnReviews");
 }
 
 function syncLanguageButtons() {
@@ -740,23 +1042,90 @@ function initLanguageSwitcher() {
   });
 }
 
+function listingPool(events, pageName) {
+  const listable = getVisibleEvents(events);
+  if (pageName === "home") {
+    return listable.filter((event) => event.publishable !== false);
+  }
+  return filterByCategory(listable, pageName);
+}
+
+function ensureListingControls() {
+  if (document.getElementById("event-search")) return;
+  const container = document.getElementById("card-container");
+  if (!container || !container.parentElement) return;
+
+  const bar = document.createElement("div");
+  bar.className = "flex flex-col sm:flex-row gap-3 mb-6";
+  bar.innerHTML = `
+    <input id="event-search" type="search" data-i18n-placeholder="home.searchPlaceholder" placeholder="${escapeHtml(t("home.searchPlaceholder"))}" class="border rounded-lg px-4 py-3 w-full bg-white" />
+    <button id="weekend-filter" type="button" class="border border-gray-300 rounded-lg px-4 py-3 text-sm font-semibold bg-white shrink-0" data-i18n="common.thisWeekend">${escapeHtml(t("common.thisWeekend"))}</button>
+  `;
+  container.parentElement.insertBefore(bar, container);
+}
+
+function syncListControls() {
+  const toggle = document.getElementById("weekend-filter");
+  if (toggle) {
+    toggle.setAttribute("aria-pressed", String(listState.weekendOnly));
+    toggle.classList.toggle("is-active", listState.weekendOnly);
+  }
+
+  const input = document.getElementById("event-search");
+  if (input && input.value !== listState.query) {
+    input.value = listState.query;
+  }
+
+  const viewAll = document.getElementById("home-view-all");
+  if (viewAll) {
+    viewAll.href = listState.weekendOnly ? "/pages/all.html?when=weekend" : "/pages/all.html";
+  }
+
+  const heading = document.getElementById("home-results-title");
+  if (heading) {
+    heading.textContent = listState.query ? t("home.searchResults") : t("home.topPicksTitle");
+  }
+}
+
+function bindListControls() {
+  const input = document.getElementById("event-search");
+  if (input && input.dataset.bound !== "true") {
+    input.dataset.bound = "true";
+    input.addEventListener("input", () => {
+      listState.query = input.value;
+      rerenderCurrentView();
+    });
+  }
+
+  const toggle = document.getElementById("weekend-filter");
+  if (toggle && toggle.dataset.bound !== "true") {
+    toggle.dataset.bound = "true";
+    toggle.addEventListener("click", () => {
+      listState.weekendOnly = toggle.getAttribute("aria-pressed") !== "true";
+      syncListControls();
+      rerenderCurrentView();
+    });
+  }
+}
+
 async function renderCards(pageName) {
   const container = document.getElementById("card-container");
   if (!container) return;
 
   try {
     const events = await loadEvents();
-    const visibleEvents = getVisibleEvents(events);
-    const items = filterByCategory(visibleEvents, pageName).map(getDisplayEvent);
+    const items = applyListFilters(listingPool(events, pageName))
+      .sort(compareRank)
+      .map(getDisplayEvent);
 
     if (!items.length) {
-      container.innerHTML = `<p class="text-gray-500">${t("common.noEvents")}</p>`;
+      container.innerHTML = `<p class="text-gray-500 col-span-full">${escapeHtml(emptyListingMessage(pageName))}</p>`;
       return;
     }
 
     container.innerHTML = items.map(createCard).join("");
   } catch (error) {
-    container.innerHTML = `<p class="text-red-500">${t("common.loadEventsError")}</p>`;
+    container.innerHTML = `<p class="text-red-500 col-span-full">${escapeHtml(t("common.loadEventsError"))}</p>`;
     console.error(error);
   }
 }
@@ -767,21 +1136,18 @@ async function renderTopPicks() {
 
   try {
     const events = await loadEvents();
-    const visibleEvents = getVisibleEvents(events);
-    const topPicks = visibleEvents
-      .slice()
-      .sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0))
-      .slice(0, 4)
+    const filtered = applyListFilters(listingPool(events, "home")).sort(compareRank);
+    const topPicks = (!listState.query && listState.weekendOnly ? filtered.slice(0, 4) : filtered)
       .map(getDisplayEvent);
 
     if (!topPicks.length) {
-      container.innerHTML = `<p class="text-gray-500">${t("common.noTopPicks")}</p>`;
+      container.innerHTML = `<p class="text-gray-500 col-span-full">${escapeHtml(emptyListingMessage("home"))}</p>`;
       return;
     }
 
     container.innerHTML = topPicks.map(createTopPickCard).join("");
   } catch (error) {
-    container.innerHTML = `<p class="text-red-500">${t("common.loadTopPicksError")}</p>`;
+    container.innerHTML = `<p class="text-red-500 col-span-full">${escapeHtml(t("common.loadTopPicksError"))}</p>`;
     console.error(error);
   }
 }
@@ -805,11 +1171,11 @@ async function renderEventDetail() {
 
   try {
     const events = await loadEvents();
-    const visibleEvents = getVisibleEvents(events);
+    const normalizedSlug = slug ? decodeURIComponent(slug).toLowerCase() : "";
 
-    const sourceEvent = slug
-      ? visibleEvents.find((e) => getEventSlug(e) === slug)
-      : visibleEvents.find((e) => e.id === id);
+    const sourceEvent = normalizedSlug
+      ? safeArray(events).find((e) => getEventSlug(e).toLowerCase() === normalizedSlug)
+      : safeArray(events).find((e) => e.id === id);
 
     if (!sourceEvent) {
       titleEl.innerText = t("common.eventNotFound");
@@ -823,6 +1189,15 @@ async function renderEventDetail() {
     const descriptionText = descriptionList.join(" ").trim();
 
     document.title = `${event.title || t("meta.eventSuffix")} | ${t("meta.eventSuffix")}`;
+    const shareUrl = `${window.location.origin}/event/${encodeURIComponent(eventSlug)}`;
+    const metaDescription = event.summary || t("meta.homeTitle");
+    upsertMeta("name", "description", metaDescription);
+    upsertMeta("property", "og:title", document.title);
+    upsertMeta("property", "og:description", metaDescription);
+    upsertMeta("property", "og:url", shareUrl);
+    if (event.image) {
+      upsertMeta("property", "og:image", event.image);
+    }
 
     let canonical = document.querySelector("link[rel='canonical']");
     if (!canonical) {
@@ -830,7 +1205,7 @@ async function renderEventDetail() {
       canonical.rel = "canonical";
       document.head.appendChild(canonical);
     }
-    canonical.href = `${window.location.origin}/event/${eventSlug}`;
+    canonical.href = shareUrl;
 
     let structuredData = document.getElementById("event-structured-data");
     if (!structuredData) {
@@ -840,14 +1215,13 @@ async function renderEventDetail() {
       document.head.appendChild(structuredData);
     }
 
-    structuredData.text = JSON.stringify({
+    const schema = {
       "@context": "https://schema.org",
       "@type": "Event",
       name: event.title || "",
       description: descriptionText || "",
       image: event.image ? [event.image] : [],
       eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-      eventStatus: "https://schema.org/EventScheduled",
       location: {
         "@type": "Place",
         name: event.location || "Tokyo"
@@ -856,8 +1230,14 @@ async function renderEventDetail() {
         "@type": "Organization",
         name: event.source || t("meta.eventSuffix")
       },
-      url: `${window.location.origin}/event/${eventSlug}`
-    });
+      url: shareUrl
+    };
+    if (parseIsoDate(sourceEvent.startDate)) schema.startDate = sourceEvent.startDate;
+    if (parseIsoDate(sourceEvent.endDate)) schema.endDate = sourceEvent.endDate;
+    if (isListable(sourceEvent)) {
+      schema.eventStatus = "https://schema.org/EventScheduled";
+    }
+    structuredData.text = JSON.stringify(schema);
 
     const categoryEl = document.getElementById("event-category");
     if (categoryEl) {
@@ -866,7 +1246,12 @@ async function renderEventDetail() {
     }
 
     titleEl.innerText = event.title || "";
-    const detailCopy = getEventDetailCopy(event);
+    const detailCopy = getEventDetailCopy(sourceEvent);
+    const banner = document.getElementById("event-status-banner");
+    if (banner) {
+      banner.hidden = !detailCopy.availabilityMessage;
+      banner.textContent = detailCopy.availabilityMessage || "";
+    }
 
     const locationRow = document.getElementById("event-location-row");
     const locationEl = document.getElementById("event-location");
@@ -904,11 +1289,6 @@ async function renderEventDetail() {
       aboutTitleEl.innerText = detailCopy.aboutTitle;
     }
 
-    const ratingSection = document.getElementById("event-rating-section");
-    if (ratingSection) {
-      ratingSection.style.display = detailCopy.ratingVisible ? "block" : "none";
-    }
-
     const imageEl = document.getElementById("event-image");
     if (imageEl) {
       imageEl.src = event.image || getFallbackImage(event);
@@ -930,7 +1310,7 @@ async function renderEventDetail() {
     if (descriptionEl) {
       if (descriptionList.length > 0) {
         descriptionEl.innerHTML = descriptionList
-          .map((paragraph) => `<p class="mb-4">${paragraph}</p>`)
+          .map((paragraph) => `<p class="mb-4">${escapeHtml(paragraph)}</p>`)
           .join("");
       } else {
         descriptionEl.innerText = event.description || "";
@@ -955,7 +1335,7 @@ async function renderEventDetail() {
           li.className = "flex items-start gap-3 text-[15px] leading-[1.42] text-gray-800";
           li.innerHTML = `
             <span class="w-2 h-2 bg-red-500 rounded-full mt-[7px] shrink-0"></span>
-            <span>${text}</span>
+            <span>${escapeHtml(text)}</span>
           `;
           highlightsEl.appendChild(li);
         });
@@ -970,8 +1350,9 @@ async function renderEventDetail() {
     const sourceLink = document.getElementById("event-source-link");
     if (sourceLink) {
       sourceLink.textContent = t("common.visitSource");
-      if (sourceEvent.sourceUrl) {
-        sourceLink.href = sourceEvent.sourceUrl;
+      const sourceHref = safeUrl(sourceEvent.sourceUrl);
+      if (sourceHref) {
+        sourceLink.href = sourceHref;
         sourceLink.style.display = "inline-block";
       } else {
         sourceLink.style.display = "none";
@@ -1055,6 +1436,7 @@ function initMenu() {
 async function rerenderCurrentView() {
   applyStaticTranslations();
   applyPageLocalization();
+  syncListControls();
 
   const page = document.body.dataset.page || "home";
 
@@ -1083,7 +1465,11 @@ async function initializePage(pageName) {
   const currentPage = pageName || document.body.dataset.page || "home";
   document.body.dataset.page = currentPage;
   setCurrentLanguage(getCurrentLanguage());
+  initListState(currentPage);
+  ensureListingControls();
+  bindListControls();
   applyStaticTranslations();
+  syncListControls();
   await loadHeader();
   await rerenderCurrentView();
 }

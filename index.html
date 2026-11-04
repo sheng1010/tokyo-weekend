@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Things to Do in Tokyo This Weekend</title>
+  <meta name="description" content="What to do in Tokyo this weekend: films, exhibitions, nightlife, and activities that still have a confirmed date." />
+  <link rel="canonical" href="https://tokyo-weekend.vercel.app/" />
+  <meta property="og:site_name" content="Tokyo Weekend" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Things to Do in Tokyo This Weekend" />
+  <meta property="og:description" content="What to do in Tokyo this weekend: films, exhibitions, nightlife, and activities that still have a confirmed date." />
+  <meta property="og:url" content="https://tokyo-weekend.vercel.app/" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./CSS/style.css" />
 </head>
@@ -18,22 +25,34 @@
       <p class="text-gray-600 mb-6 max-w-2xl mx-auto" data-i18n="home.heroSubtitle">
         Find film screenings, exhibitions, nightlife and useful event picks in Tokyo.
       </p>
-      <input
-        type="text"
-        placeholder="Search events..."
-        data-i18n-placeholder="home.searchPlaceholder"
-        class="border rounded-lg px-4 py-3 w-full max-w-md"
-      />
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-stretch max-w-xl mx-auto">
+        <input
+          id="event-search"
+          type="search"
+          placeholder="Search events..."
+          data-i18n-placeholder="home.searchPlaceholder"
+          class="border rounded-lg px-4 py-3 w-full bg-white"
+        />
+        <button
+          id="weekend-filter"
+          type="button"
+          class="border border-gray-300 rounded-lg px-4 py-3 text-sm font-semibold bg-white shrink-0"
+          aria-pressed="true"
+          data-i18n="common.thisWeekend"
+        >
+          This weekend
+        </button>
+      </div>
     </div>
   </section>
 
   <section class="max-w-6xl mx-auto py-12 px-4">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold" data-i18n="home.topPicksTitle">Top Picks This Weekend</h2>
-      <a href="./pages/activities.html" class="text-red-500 text-sm hover:underline" data-i18n="common.viewAll">View all</a>
+    <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+      <h2 class="text-2xl font-bold" id="home-results-title" data-i18n="home.topPicksTitle">Top Picks This Weekend</h2>
+      <a id="home-view-all" href="/pages/all.html?when=weekend" class="text-red-500 text-sm hover:underline shrink-0" data-i18n="common.viewAll">View all</a>
     </div>
 
-    <div id="top-picks-container" class="grid grid-cols-4 gap-4 items-stretch"></div>
+    <div id="top-picks-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch"></div>
   </section>
 
   <footer class="text-center text-gray-500 py-8 text-sm" data-i18n="common.footer">

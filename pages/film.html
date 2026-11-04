@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tokyo Film Guide</title>
+  <meta name="description" content="Tokyo films that include a confirmed screening date. Titles listed only as now showing are not shown as current." />
+  <link rel="canonical" href="https://tokyo-weekend.vercel.app/pages/film.html" />
+  <meta property="og:site_name" content="Tokyo Weekend" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Tokyo Film Guide" />
+  <meta property="og:description" content="Tokyo films that include a confirmed screening date. Titles listed only as now showing are not shown as current." />
+  <meta property="og:url" content="https://tokyo-weekend.vercel.app/pages/film.html" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../CSS/style.css" />
 </head>
@@ -11,7 +18,9 @@
   <div id="header"></div>
 
   <section class="max-w-6xl mx-auto py-16 px-4">
-    <div id="card-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+    <h1 class="text-3xl font-bold mb-3" data-i18n="meta.filmTitle">Tokyo Film Guide</h1>
+    <p class="text-gray-600 mb-8 max-w-2xl" data-i18n="filmPage.intro">Only films with a confirmed screening end date are listed. A title that only says “now showing” is not treated as current.</p>
+    <div id="card-container" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
   </section>
 
   <script src="../Js/main.js"></script>

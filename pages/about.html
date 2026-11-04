@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About | Tokyo Weekend</title>
+  <meta name="description" content="Tokyo Weekend lists films, exhibitions, nightlife, and activities from public sources. Ended events are hidden, and there are no made-up visitor ratings." />
+  <link rel="canonical" href="https://tokyo-weekend.vercel.app/pages/about.html" />
+  <meta property="og:site_name" content="Tokyo Weekend" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="About | Tokyo Weekend" />
+  <meta property="og:description" content="Tokyo Weekend lists films, exhibitions, nightlife, and activities from public sources. Ended events are hidden, and there are no made-up visitor ratings." />
+  <meta property="og:url" content="https://tokyo-weekend.vercel.app/pages/about.html" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../CSS/style.css" />
+</head>
+<body class="bg-gray-50 text-gray-900" data-page="about">
+  <div id="header"></div>
+
+  <main class="max-w-3xl mx-auto px-4 py-16 space-y-6">
+    <h1 class="text-4xl font-bold" data-i18n="about.title">About Tokyo Weekend</h1>
+    <p class="text-gray-700 leading-8" data-i18n="about.lead">
+      Tokyo Weekend is a small guide to films, exhibitions, nightlife, and city activities. Listings are collected from public museum, cinema, and event pages, then shortened for the site.
+    </p>
+    <p class="text-gray-700 leading-8" data-i18n="about.dates">
+      An event with an end date before today is hidden. A film that only says “now showing”, with no end date, is not labeled as currently showing. “This weekend” means Friday through Sunday of the current week, and only events whose dates overlap that window.
+    </p>
+    <p class="text-gray-700 leading-8" data-i18n="about.sources">
+      Dates, venues, and ticket links come from the source pages. The short summaries are editorial text. This site does not invent visitor scores or reviews.
+    </p>
+    <p class="text-gray-700 leading-8">
+      <a class="text-red-500 hover:underline" href="/pages/contact.html" data-i18n="about.contactLink">Contact</a>
+    </p>
+  </main>
+
+  <script src="../Js/main.js"></script>
+  <script type="module">
+    import { bootstrapPage } from "../Js/firebase-auth.js";
+    await bootstrapPage("about");
+  </script>
+</body>
+</html>

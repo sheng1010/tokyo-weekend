@@ -36,6 +36,15 @@ const authState = {
   error: null
 };
 
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function translate(key, fallback, replacements = {}) {
   if (typeof window.t === "function") {
     const translated = window.t(key, replacements);
@@ -212,14 +221,14 @@ function renderDesktopUserState(container, user) {
       <button type="button" class="tw-account-trigger" data-auth-menu-toggle aria-expanded="false">
         <span class="tw-account-avatar">${getInitials(user)}</span>
         <span class="tw-account-copy">
-          <strong>${getDisplayName(user)}</strong>
-          <span>${translate("common.account", "Account")}</span>
+          <strong>${escapeHtml(getDisplayName(user))}</strong>
+          <span>${escapeHtml(translate("common.account", "Account"))}</span>
         </span>
       </button>
       <div class="tw-account-menu" hidden>
         <p class="tw-account-menu__eyebrow">${translate("common.account", "Account")}</p>
-        <p class="tw-account-menu__name">${getDisplayName(user)}</p>
-        <p class="tw-account-menu__email">${getUserSubtitle(user)}</p>
+        <p class="tw-account-menu__name">${escapeHtml(getDisplayName(user))}</p>
+        <p class="tw-account-menu__email">${escapeHtml(getUserSubtitle(user))}</p>
         <div class="tw-account-menu__actions">
           <a class="tw-account-menu__link" href="${getAccountHomeHref()}">
             ${translate("auth.manageAccount", "Manage account")}
@@ -253,8 +262,8 @@ function renderMobileUserState(container, user) {
       <div class="tw-mobile-auth__identity">
         <span class="tw-account-avatar">${getInitials(user)}</span>
         <div>
-          <p class="tw-mobile-auth__name">${getDisplayName(user)}</p>
-          <p class="tw-mobile-auth__email">${getUserSubtitle(user)}</p>
+          <p class="tw-mobile-auth__name">${escapeHtml(getDisplayName(user))}</p>
+          <p class="tw-mobile-auth__email">${escapeHtml(getUserSubtitle(user))}</p>
         </div>
       </div>
       <div class="tw-mobile-auth__actions">

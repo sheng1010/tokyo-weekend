@@ -90,6 +90,13 @@ def get_client() -> OpenAI:
     return OpenAI()
 
 
+def coerce_score(value) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def sanitize_text(value) -> str:
     if value is None:
         return ""
@@ -567,6 +574,7 @@ def normalize_final_event(item: dict) -> dict:
         "publishable": bool(item.get("publishable", True)),
         "qualityScore": int(item.get("qualityScore", 0) or 0),
         "qualityReasons": normalize_list(item.get("qualityReasons")),
+        "popularityScore": coerce_score(item.get("popularityScore", item.get("score"))),
     }
 
 
@@ -575,7 +583,8 @@ def validate_final_event_schema(item: dict):
         "id", "slug", "title", "category", "location", "venue", "date",
         "image", "summary", "description", "highlights",
         "access", "source", "sourceUrl",
-        "needsReview", "publishable", "qualityScore", "qualityReasons"
+        "needsReview", "publishable", "qualityScore", "qualityReasons",
+        "popularityScore",
     ]
 
     for field in required_fields:
@@ -1762,6 +1771,7 @@ def enrich_event(client: OpenAI, item, index):
         "publishable": best_quality["publishable"],
         "qualityScore": best_quality["qualityScore"],
         "qualityReasons": best_quality["qualityReasons"],
+        "popularityScore": item.get("popularityScore", item.get("score", 0)),
     }
 
     return normalize_final_event(enriched)

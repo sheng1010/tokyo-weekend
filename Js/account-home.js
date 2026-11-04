@@ -3,34 +3,14 @@ const calendarState = {
   selectedDate: stripTime(new Date())
 };
 
-const sampleActivitiesByDate = {
-  "2026-05-09": [
-    {
-      title: "Late screening shortlist",
-      category: "Film",
-      detail: "Hold space for one evening screening near Yurakucho."
-    }
-  ],
-  "2026-05-16": [
-    {
-      title: "Museum afternoon",
-      category: "Exhibition",
-      detail: "Pair one major exhibition with a slower lunch nearby."
-    },
-    {
-      title: "Night plan placeholder",
-      category: "Nightlife",
-      detail: "Reserve this slot for a later venue decision."
-    }
-  ],
-  "2026-05-23": [
-    {
-      title: "Outdoor activity block",
-      category: "Activity",
-      detail: "Keep the afternoon open for a seasonal event or walk."
-    }
-  ]
-};
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 const planTemplate = [
   { slot: "Morning", detail: "No plan yet" },
@@ -131,8 +111,8 @@ function buildSignInHref() {
   return "/pages/auth.html";
 }
 
-function getActivitiesForDate(date) {
-  return sampleActivitiesByDate[getDateKey(date)] || [];
+function getActivitiesForDate() {
+  return [];
 }
 
 function getScheduleForDate(date) {
@@ -164,9 +144,9 @@ function renderAuthStatusCard() {
     const email = authState.user.email || "";
 
     container.innerHTML = `
-      <p class="tw-account-home__status-label">${t("accountHome.linkingReady", "Activity linking ready")}</p>
-      <h2 class="tw-account-home__status-title">${name}</h2>
-      <p class="tw-account-home__status-copy">${email}</p>
+      <p class="tw-account-home__status-label">${t("accountHome.linkingReady", "Preview only")}</p>
+      <h2 class="tw-account-home__status-title">${escapeHtml(name)}</h2>
+      <p class="tw-account-home__status-copy">${escapeHtml(email)}</p>
       <p class="tw-account-home__status-note">${t("accountHome.linkingReadyBody", "This page is prepared for attaching saved events, screenings, and exhibitions to specific dates later on.")}</p>
     `;
     return;
@@ -272,9 +252,9 @@ function renderSelectedDay() {
       .map(
         (item) => `
           <article class="tw-linked-activity">
-            <span class="tw-linked-activity__category">${item.category}</span>
-            <h3>${item.title}</h3>
-            <p>${item.detail}</p>
+            <span class="tw-linked-activity__category">${escapeHtml(item.category)}</span>
+            <h3>${escapeHtml(item.title)}</h3>
+            <p>${escapeHtml(item.detail)}</p>
           </article>
         `
       )
