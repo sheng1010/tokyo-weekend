@@ -23,6 +23,13 @@ RAW_OUTPUT_PATH = "data/raw_events.json"
 MAIN_LOCK_FILE = "main.lock"
 BUILD_LOCK_FILE = "build_events.lock"
 
+def coerce_score(value):
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def normalize_raw_event(item):
     screening_venues = []
     for venue in item.get("screeningVenues", []):
@@ -54,6 +61,7 @@ def normalize_raw_event(item):
         "cast": repair_text_encoding(item.get("cast", "")),
         "screeningVenues": screening_venues,
         "rawDescription": item.get("rawDescription", []),
+        "popularityScore": coerce_score(item.get("popularityScore", item.get("score"))),
     }
 
 def dedupe_raw_events(events):

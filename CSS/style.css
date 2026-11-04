@@ -1052,3 +1052,24 @@
     font-size: 22px;
   }
 }
+
+.tw-status-banner,
+.tw-preview-banner {
+  border: 1px solid rgba(180, 83, 9, 0.35);
+  background: #fffbeb;
+  color: #78350f;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.tw-preview-banner {
+  margin: 0 0 16px;
+}
+
+#weekend-filter.is-active {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}

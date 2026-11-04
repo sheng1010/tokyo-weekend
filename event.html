@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Event</title>
+  <title>Event | Tokyo Weekend</title>
+  <meta name="description" content="Event details from Tokyo Weekend. Ended listings are marked, and films without a screening end date are not labeled as now showing." />
+  <link rel="canonical" href="https://tokyo-weekend.vercel.app/event.html" />
+  <meta property="og:site_name" content="Tokyo Weekend" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Event | Tokyo Weekend" />
+  <meta property="og:description" content="Event details from Tokyo Weekend. Ended listings are marked, and films without a screening end date are not labeled as now showing." />
+  <meta property="og:url" content="https://tokyo-weekend.vercel.app/event.html" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./CSS/style.css" />
 </head>
@@ -12,6 +19,7 @@
   <div id="header"></div>
 
   <section class="max-w-5xl mx-auto px-4 py-12 space-y-6">
+    <p id="event-status-banner" class="tw-status-banner" hidden></p>
     <img id="event-image" class="w-full rounded-2xl shadow-sm" alt="event image" />
 
     <div>
@@ -52,29 +60,6 @@
       <div class="rounded-3xl bg-white p-7 md:p-8 shadow-sm">
         <h2 class="mb-5 text-2xl md:text-3xl font-bold text-gray-900" data-event-heading="highlights">Highlights</h2>
         <ul id="event-highlights" class="space-y-3"></ul>
-      </div>
-
-      <div id="event-rating-section" class="rounded-3xl bg-white p-7 md:p-8 shadow-sm">
-        <div class="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 items-start">
-          <div>
-            <h2 class="mb-4 text-[20px] md:text-[22px] font-bold text-gray-900" data-event-heading="rating">Visitor rating</h2>
-
-            <div class="flex items-end gap-3">
-              <span id="event-rating-score" class="text-[44px] md:text-[48px] leading-none font-bold text-gray-900">4.7</span>
-              <div class="pb-1">
-                <p class="text-sm leading-none text-gray-500" data-i18n-static="outOfFive">out of 5</p>
-                <p id="event-rating-count" class="mt-2 text-[13px] leading-snug text-gray-400">Based on 128 reviews</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="rounded-2xl border border-gray-100 bg-gray-50 p-5 md:p-6">
-            <p id="event-review-author" class="mb-3 text-[13px] text-gray-500">Aya, 29</p>
-            <p id="event-review-text" class="text-[15px] leading-7 text-gray-800">
-              Surprisingly intense in person. The scale feels much stranger than photos.
-            </p>
-          </div>
-        </div>
       </div>
 
       <div class="rounded-3xl bg-white p-7 md:p-8 shadow-sm">
